@@ -33,6 +33,19 @@ export interface PressProject {
   assets?: PressAsset[];
   renders?: PressRender[];
   errorMessage?: string | null;
+  latestJob?: PressJobSummary | null;
+}
+
+export interface PressJobSummary {
+  id: string;
+  type: string;
+  status: string;
+  progress: number;
+  attempts: number;
+  maxAttempts: number;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface PressTranscriptSegment {

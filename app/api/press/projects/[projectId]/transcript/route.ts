@@ -4,6 +4,8 @@ import { createPressAdminClient } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { updateTranscriptSchema } from "@/lib/press/schemas";
 import { requireProject, rows } from "@/lib/press/service";
+import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
+import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
 import type { PressTranscript, PressTranscriptSegment } from "@/lib/press/types";
 
 export const runtime = "nodejs";
@@ -33,8 +35,11 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
   try {
-    const project = await requireProject((await params).projectId);
+    const project = await requireProject((await params).projectId, PRESS_EDITOR_ROLES);
     const input = updateTranscriptSchema.parse(await request.json());
+    const { user } = await requirePressUser();
+    const rateLimited = await checkPressMutationRateLimit(request, user.id);
+    if (rateLimited) return rateLimited;
     const current = await loadTranscript(project.id);
     if (!current) throw new PressHttpError(404, "Transcript not found");
     if (current.version !== input.version) {

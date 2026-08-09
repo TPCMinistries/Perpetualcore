@@ -3,18 +3,24 @@ import { createPressAdminClient } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { finalizeAssetSchema } from "@/lib/press/schemas";
 import { asAsset, asJob, requireAsset, requireProject } from "@/lib/press/service";
+import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
+import { assertPressJobCapacity } from "@/lib/press/limits";
+import { checkPressJobRateLimit } from "@/lib/press/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ assetId: string }> }) {
   try {
-    const asset = await requireAsset((await params).assetId);
-    const project = await requireProject(asset.project_id);
+    const asset = await requireAsset((await params).assetId, PRESS_EDITOR_ROLES);
+    const project = await requireProject(asset.project_id, PRESS_EDITOR_ROLES);
     if (!project.rights_attested_at || !project.rights_attested_by) {
       return NextResponse.json({ error: "Media rights attestation is required before processing" }, { status: 403 });
     }
     const input = finalizeAssetSchema.parse(await request.json());
-    if (asset.status !== "awaiting_upload") {
+    const { user } = await requirePressUser();
+    const rateLimited = await checkPressJobRateLimit(request, user.id);
+    if (rateLimited) return rateLimited;
+    if (!(asset.status === "awaiting_upload" || asset.status === "uploaded")) {
       return NextResponse.json({ error: "Asset is not awaiting upload" }, { status: 409 });
     }
     if (asset.checksum && input.checksum && asset.checksum !== input.checksum) {
@@ -37,22 +43,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (actualMime && actualMime !== asset.mime_type) {
       return NextResponse.json({ error: "Uploaded object type does not match intent" }, { status: 409 });
     }
-    const now = new Date().toISOString();
-    const { data: updated, error: updateError } = await admin.from("press_assets").update({
-      status: "uploaded", checksum: input.checksum ?? asset.checksum,
-      duration_seconds: input.durationSeconds ?? null, updated_at: now,
-    }).eq("id", asset.id).eq("organization_id", asset.organization_id).select("*").single();
-    if (updateError) throw updateError;
-    const { data: job, error: jobError } = await admin.from("press_jobs").insert({
-      organization_id: asset.organization_id, project_id: asset.project_id, asset_id: asset.id,
-      render_id: null, job_type: "probe_media", status: "pending", priority: 50,
-      attempts: 0, max_attempts: 3, progress: 0, payload: { assetId: asset.id }, result: {},
-      error_message: null, lease_owner: null, lease_expires_at: null,
-      idempotency_key: `probe_media:${asset.id}`,
-    }).select("*").single();
-    if (jobError) throw jobError;
-    await admin.from("press_projects").update({ status: "processing", updated_at: now })
-      .eq("id", asset.project_id).eq("organization_id", asset.organization_id);
-    return NextResponse.json({ asset: asAsset(updated), job: asJob(job) });
+    await assertPressJobCapacity(admin, asset.organization_id);
+    const { data: finalized, error: finalizeError } = await admin.rpc("press_finalize_asset_upload", {
+      p_asset_id: asset.id,
+      p_checksum: input.checksum ?? undefined,
+      p_duration_seconds: input.durationSeconds ?? undefined,
+    });
+    if (finalizeError) throw finalizeError;
+    const result = finalized as unknown as { asset: unknown; job: unknown };
+    return NextResponse.json({ asset: asAsset(result.asset), job: asJob(result.job) });
   } catch (error) { return pressErrorResponse(error); }
 }

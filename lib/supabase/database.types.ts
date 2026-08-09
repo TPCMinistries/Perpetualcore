@@ -18386,6 +18386,8 @@ export type Database = {
           reviewed_by: string | null
           score: number | null
           scores: Json
+          source_job_id: string | null
+          source_position: number | null
           start_ms: number
           status: string
           summary: string | null
@@ -18406,6 +18408,8 @@ export type Database = {
           reviewed_by?: string | null
           score?: number | null
           scores?: Json
+          source_job_id?: string | null
+          source_position?: number | null
           start_ms: number
           status?: string
           summary?: string | null
@@ -18426,6 +18430,8 @@ export type Database = {
           reviewed_by?: string | null
           score?: number | null
           scores?: Json
+          source_job_id?: string | null
+          source_position?: number | null
           start_ms?: number
           status?: string
           summary?: string | null
@@ -18439,6 +18445,13 @@ export type Database = {
             columns: ["generation_run_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "press_generation_runs"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "press_clips_source_job_tenant_fk"
+            columns: ["source_job_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "press_jobs"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -18560,6 +18573,7 @@ export type Database = {
           job_type: string
           lease_expires_at: string | null
           lease_owner: string | null
+          lease_token: string | null
           max_attempts: number
           organization_id: string
           payload: Json
@@ -18582,6 +18596,7 @@ export type Database = {
           job_type: string
           lease_expires_at?: string | null
           lease_owner?: string | null
+          lease_token?: string | null
           max_attempts?: number
           organization_id: string
           payload?: Json
@@ -18604,6 +18619,7 @@ export type Database = {
           job_type?: string
           lease_expires_at?: string | null
           lease_owner?: string | null
+          lease_token?: string | null
           max_attempts?: number
           organization_id?: string
           payload?: Json
@@ -19046,6 +19062,7 @@ export type Database = {
           language: string | null
           organization_id: string
           project_id: string
+          source_job_id: string | null
           status: string
           updated_at: string
           version: number
@@ -19058,6 +19075,7 @@ export type Database = {
           language?: string | null
           organization_id: string
           project_id: string
+          source_job_id?: string | null
           status?: string
           updated_at?: string
           version?: number
@@ -19070,6 +19088,7 @@ export type Database = {
           language?: string | null
           organization_id?: string
           project_id?: string
+          source_job_id?: string | null
           status?: string
           updated_at?: string
           version?: number
@@ -19080,6 +19099,13 @@ export type Database = {
             columns: ["asset_id", "organization_id"]
             isOneToOne: false
             referencedRelation: "press_assets"
+            referencedColumns: ["id", "organization_id"]
+          },
+          {
+            foreignKeyName: "press_transcripts_source_job_tenant_fk"
+            columns: ["source_job_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "press_jobs"
             referencedColumns: ["id", "organization_id"]
           },
           {
@@ -31934,6 +31960,7 @@ export type Database = {
           job_type: string
           lease_expires_at: string | null
           lease_owner: string | null
+          lease_token: string | null
           max_attempts: number
           organization_id: string
           payload: Json
@@ -31953,6 +31980,14 @@ export type Database = {
         }
       }
       press_ensure_workspace: { Args: { p_user_id: string }; Returns: string }
+      press_finalize_asset_upload: {
+        Args: {
+          p_asset_id: string
+          p_checksum?: string
+          p_duration_seconds?: number
+        }
+        Returns: Json
+      }
       press_has_org_role: {
         Args: { p_org_id: string; p_roles?: string[] }
         Returns: boolean
@@ -32001,10 +32036,58 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      press_reserve_asset_upload: {
+        Args: {
+          p_asset_id: string
+          p_bucket: string
+          p_checksum?: string
+          p_file_size: number
+          p_kind: string
+          p_mime_type: string
+          p_organization_id: string
+          p_original_filename: string
+          p_project_id: string
+          p_storage_path: string
+        }
+        Returns: {
+          bucket: string
+          checksum: string | null
+          created_at: string
+          duration_seconds: number | null
+          file_size: number
+          id: string
+          kind: string
+          metadata: Json
+          mime_type: string
+          organization_id: string
+          original_filename: string
+          project_id: string
+          status: string
+          storage_path: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "press_assets"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       press_replace_transcript: {
         Args: {
           p_asset_id: string
           p_full_text: string
+          p_language: string
+          p_project_id: string
+          p_segments: Json
+        }
+        Returns: string
+      }
+      press_replace_transcript_for_job: {
+        Args: {
+          p_asset_id: string
+          p_full_text: string
+          p_job_id: string
           p_language: string
           p_project_id: string
           p_segments: Json

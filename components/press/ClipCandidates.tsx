@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertCircle, Check, Clock3, Film, Loader2, Pencil, Scissors, X } from "lucide-react";
+import { AlertCircle, Check, Clock3, Film, Loader2, Pencil, Play, Scissors, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -24,7 +24,12 @@ function scoreLabel(score?: number | null): string | null {
 
 const RATIOS: PressRender["aspectRatio"][] = ["9:16", "1:1", "16:9"];
 
-export function ClipCandidates({ clips, onChange, onRenders }: { clips: PressClip[]; onChange: (clip: PressClip) => void; onRenders: (renders: PressRender[]) => void }) {
+export function ClipCandidates({ clips, onChange, onRenders, onPreview }: {
+  clips: PressClip[];
+  onChange: (clip: PressClip) => void;
+  onRenders: (renders: PressRender[]) => void;
+  onPreview: (clip: PressClip) => void;
+}) {
   const [selected, setSelected] = useState<PressClip | null>(null);
   const [dialog, setDialog] = useState<"edit" | "reject" | "render" | null>(null);
   const [reason, setReason] = useState("");
@@ -147,6 +152,9 @@ export function ClipCandidates({ clips, onChange, onRenders }: { clips: PressCli
               {clip.scoreReason && <p className="mt-4 border-l-2 border-zinc-300 pl-3 text-xs leading-5 text-zinc-500">{clip.scoreReason}</p>}
 
               <div className="mt-auto flex flex-wrap gap-2 border-t border-zinc-200 pt-5">
+                <Button type="button" variant="outline" className="h-11 rounded-md" disabled={working} onClick={() => onPreview(clip)}>
+                  <Play className="mr-2 h-4 w-4" aria-hidden /> Preview moment
+                </Button>
                 {(clip.status === "candidate" || clip.status === "approved") && (
                   <Button type="button" variant="outline" className="h-11 rounded-md" disabled={working} onClick={() => openEdit(clip)}>
                     <Pencil className="mr-2 h-4 w-4" aria-hidden /> Edit clip

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRESS_ACCEPTED_MIME_TYPES, PRESS_MAX_FILE_BYTES } from "./media";
 
 export const uuidSchema = z.string().uuid();
 export const projectStatusSchema = z.enum([
@@ -16,14 +17,14 @@ export const createProjectSchema = z.object({
 
 export const updateProjectSchema = z.object({
   title: z.string().trim().min(1).max(160).optional(),
-  status: projectStatusSchema.optional(),
+  status: z.literal("archived").optional(),
   platforms: z.array(z.string().trim().min(1).max(40)).max(12).optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, "No updates provided");
 
 export const uploadIntentSchema = z.object({
   fileName: z.string().trim().min(1).max(255),
-  mimeType: z.string().regex(/^(audio|video)\/[a-z0-9.+-]+$/i),
-  fileSize: z.number().int().positive().max(2 * 1024 * 1024 * 1024),
+  mimeType: z.enum(PRESS_ACCEPTED_MIME_TYPES),
+  fileSize: z.number().int().positive().max(PRESS_MAX_FILE_BYTES),
   checksum: z.string().trim().regex(/^[0-9a-f]{64}$/).optional(),
 }).strict();
 
@@ -102,6 +103,7 @@ export const claimJobSchema = z.object({
 
 export const reportJobSchema = z.object({
   workerId: z.string().trim().min(3).max(120),
+  leaseToken: uuidSchema,
   status: z.enum(["processing", "completed", "failed"]),
   progress: z.number().int().min(0).max(100).optional(),
   result: z.record(z.string(), z.unknown()).optional(),

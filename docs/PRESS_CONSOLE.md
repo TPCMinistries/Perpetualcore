@@ -17,11 +17,23 @@ Completed on 2026-07-15:
 - configured `PRESS_WORKER_SECRET` in Vercel production and macOS Keychain;
 - installed the private worker as the `com.perpetualcore.press-worker` launch agent, verified its live heartbeat, and cached the Whisper `small` model.
 
+Completed on 2026-08-09:
+
+- made production access invite-only at both the Studio and API layers, with owner, email, and domain allowlists;
+- enforced viewer read-only access before all service-role mutations;
+- capped each source at 512 MB, each workspace at 10 GB of reserved media, active recordings at 25, and active jobs at 8;
+- made upload reservation/finalization and first-job creation transactional and idempotent;
+- added per-lease fencing tokens, idempotent transcript/clip result writes, and deterministic clip identities for safe retries;
+- bounded worker download size, process duration, and captured subprocess output;
+- added real source playback at candidate timestamps and signed previews/downloads for completed exports;
+- reduced idle worker checks to once per minute. Browser pages never poll automatically; upload, generation, render, and refresh actions are user-triggered.
+
 Still required before enabling broad customer access:
 
 1. Run an organization-isolation test with two real test workspaces before enabling customer access.
 2. Run one consented sample through upload, transcript correction, clip-boundary adjustment, approval, all three render formats, manual export, and cleanup.
 3. Move the worker from the supervised Mac launch agent to an always-on private cloud host before promising 24/7 processing. The current worker is available while Lorenzo's Mac user session is running and online.
+4. Add resumable uploads, customer-visible deletion/retention controls, a receiving support inbox, and reviewed customer terms before opening self-serve paid access.
 
 ## Product boundary
 
@@ -56,9 +68,12 @@ The web runtime needs the existing Supabase server variables plus:
 ```bash
 PRESS_WORKER_SECRET=<long-random-server-only-value>
 PRESS_PUBLISH_ADAPTERS=
+PRESS_SELF_SERVE_SIGNUP=false
+PRESS_BETA_ALLOWED_EMAILS=invited.person@example.com
+PRESS_BETA_ALLOWED_DOMAINS=
 ```
 
-The worker uses the variables documented in `scripts/press/.env.example`. Keep `PRESS_PUBLISH_ADAPTERS` empty until a provider adapter has been reviewed and its target row is explicitly marked `adapter_configured = true`. The current product records schedules and manual exports; it does not claim to post directly to a social platform.
+`HQ_OWNER_EMAILS` also grants owner access. Leave `PRESS_SELF_SERVE_SIGNUP` unset or `false` during the guided pilot. The worker uses the variables documented in `scripts/press/.env.example`. Keep `PRESS_PUBLISH_ADAPTERS` empty until a provider adapter has been reviewed and its target row is explicitly marked `adapter_configured = true`. The current product records schedules and manual exports; it does not claim to post directly to a social platform.
 
 ## Media pipeline
 

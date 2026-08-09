@@ -30,6 +30,7 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [panelWarning, setPanelWarning] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("source");
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [archiving, setArchiving] = useState(false);
@@ -56,18 +57,22 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
       setLoading(true);
     }
     setError(null);
+    setPanelWarning(null);
     try {
-      const [nextProject, nextTranscript, nextClips, nextRenders] = await Promise.all([
-        getPressProject(projectId, signal),
+      const nextProject = await getPressProject(projectId, signal);
+      setProject(nextProject);
+      if (!background && nextProject.status === "review") setActiveTab("clips");
+      const [transcriptResult, clipsResult, rendersResult] = await Promise.allSettled([
         getPressTranscript(projectId, signal),
         listPressClips(projectId, signal),
         listPressRenders(projectId, signal),
       ]);
-      setProject(nextProject);
-      if (!background && nextProject.status === "review") setActiveTab("clips");
-      setTranscript(nextTranscript);
-      setClips(nextClips);
-      setRenders(nextRenders);
+      if (transcriptResult.status === "fulfilled") setTranscript(transcriptResult.value);
+      if (clipsResult.status === "fulfilled") setClips(clipsResult.value);
+      if (rendersResult.status === "fulfilled") setRenders(rendersResult.value);
+      if ([transcriptResult, clipsResult, rendersResult].some((result) => result.status === "rejected")) {
+        setPanelWarning("Some production details could not be refreshed. Your source record is still available; try Refresh status.");
+      }
     } catch (loadError) {
       if (loadError instanceof DOMException && loadError.name === "AbortError") return;
       setError(getErrorMessage(loadError));
@@ -139,6 +144,18 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
         {project.status === "failed" && project.errorMessage && <div className="mt-5 flex items-start gap-2 border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{project.errorMessage}</div>}
       </header>
 
+      {(panelWarning || project.latestJob?.errorMessage) && (
+        <div className="mt-4 flex items-start gap-3 border border-amber-300 bg-amber-50 p-4 text-sm leading-6 text-amber-950" role="status">
+          <AlertCircle className="mt-1 h-4 w-4 shrink-0" aria-hidden />
+          <div>
+            <p className="font-semibold">{project.latestJob?.errorMessage || panelWarning}</p>
+            {project.latestJob?.errorMessage && (
+              <p className="mt-1 text-xs text-amber-800">Step: {project.latestJob.type.replaceAll("_", " ")} · attempt {project.latestJob.attempts} of {project.latestJob.maxAttempts}</p>
+            )}
+          </div>
+        </div>
+      )}
+
       <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
         <div className="overflow-x-auto pb-1">
           <TabsList className="h-12 min-w-max justify-start rounded-none border border-zinc-300 bg-white p-1">
@@ -182,7 +199,20 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
             <h2 className="text-xl font-semibold tracking-tight text-zinc-950">Choose the moments worth using</h2>
             <p className="mt-1 text-sm text-zinc-600">Approve only the clips that sound right and deserve to move forward.</p>
           </div>
-          <ClipCandidates clips={clips} onChange={(updated) => setClips((current) => current.map((clip) => clip.id === updated.id ? updated : clip))} onRenders={(created) => setRenders((current) => [...created, ...current.filter((item) => !created.some((next) => next.id === item.id))])} />
+          <div className="grid gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)] xl:items-start">
+            <div className="xl:sticky xl:top-24">
+              <SourcePlayer asset={asset} playbackAsset={proxyAsset} posterAsset={posterAsset} seekToMs={seekToMs} />
+              <p className="border-x border-b border-zinc-300 bg-[#f6f1e8] px-4 py-3 text-xs leading-5 text-zinc-600">
+                Preview the actual moment before you approve it. Timing changes return approved clips to review.
+              </p>
+            </div>
+            <ClipCandidates
+              clips={clips}
+              onPreview={(clip) => setSeekToMs(clip.startMs)}
+              onChange={(updated) => setClips((current) => current.map((clip) => clip.id === updated.id ? updated : clip))}
+              onRenders={(created) => setRenders((current) => [...created, ...current.filter((item) => !created.some((next) => next.id === item.id))])}
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="exports" className="mt-6 focus-visible:ring-zinc-950">
@@ -190,7 +220,7 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
             <h2 className="text-xl font-semibold tracking-tight text-zinc-950">Ready-to-use downloads</h2>
             <p className="mt-1 text-sm text-zinc-600">Download the formats you approved. Secure links are created only when you ask for them.</p>
           </div>
-          <ExportsPanel renders={renders} />
+          <ExportsPanel renders={renders} clips={clips} />
         </TabsContent>
 
         <TabsContent value="publish" className="mt-6 focus-visible:ring-zinc-950">
