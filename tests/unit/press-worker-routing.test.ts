@@ -11,6 +11,10 @@ const reportRouteSource = readFileSync(
   resolve(process.cwd(), "app/api/press/worker/jobs/[jobId]/report/route.ts"),
   "utf8",
 );
+const workerSource = readFileSync(
+  resolve(process.cwd(), "scripts/press/queue-worker.ts"),
+  "utf8",
+);
 
 describe("Press worker routing contract", () => {
   it("lets the authenticated queue worker reach its claim route", () => {
@@ -32,5 +36,13 @@ describe("Press worker routing contract", () => {
     expect(reportRouteSource).toContain("endMs: segment.endMs");
     expect(reportRouteSource).not.toContain("start_ms: segment.startMs");
     expect(reportRouteSource).not.toContain("end_ms: segment.endMs");
+  });
+
+  it("renders caption overlays without requiring an optional FFmpeg subtitles build", () => {
+    expect(workerSource).toContain('import { createCanvas } from "canvas"');
+    expect(workerSource).toContain("writeCaptionOverlay({");
+    expect(workerSource).toContain('"-filter_complex"');
+    expect(workerSource).toContain("overlay=0:0:enable=");
+    expect(workerSource).not.toContain("subtitles=captions.srt");
   });
 });
