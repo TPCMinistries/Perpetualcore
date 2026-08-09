@@ -26,4 +26,11 @@ describe("Press worker routing contract", () => {
     expect(reportRouteSource).toContain("job.lease_token !== input.leaseToken");
     expect(reportRouteSource).toContain('.eq("lease_token", input.leaseToken)');
   });
+
+  it("passes transcript segment keys expected by the atomic result RPC", () => {
+    expect(reportRouteSource).toContain("startMs: segment.startMs");
+    expect(reportRouteSource).toContain("endMs: segment.endMs");
+    expect(reportRouteSource).not.toContain("start_ms: segment.startMs");
+    expect(reportRouteSource).not.toContain("end_ms: segment.endMs");
+  });
 });
