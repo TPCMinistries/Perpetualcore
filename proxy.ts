@@ -175,30 +175,12 @@ export async function proxy(request: NextRequest) {
     return publicResponse;
   }
 
-  // The legacy Mac worker API was removed when Press moved to the Mac Mini
-  // private runtime. Return a stable terminal response before session refresh
-  // or Redis so stale workers cannot create a paid retry loop.
-  if (pathname === '/api/press/worker/jobs/claim') {
-    return NextResponse.json(
-      {
-        error: 'Press worker endpoint retired',
-        code: 'PRESS_WORKER_ENDPOINT_RETIRED',
-      },
-      {
-        status: 410,
-        headers: {
-          'Cache-Control': 'public, max-age=3600',
-        },
-      }
-    );
-  }
-
-  // Machine-to-machine Company Graph receipts are authenticated inside the
-  // These routes perform their own server-side bearer authentication. Skip
-  // session refresh and the shared Redis limiter so an exhausted public API
-  // quota cannot interrupt bounded internal health signals.
+  // Machine-to-machine routes perform their own server-side bearer
+  // authentication. Skip browser session refresh and the shared Redis limiter
+  // so internal workers are not coupled to public API traffic.
   if (
-    pathname === '/api/internal/company-graph-readiness'
+    pathname.startsWith('/api/press/worker/')
+    || pathname === '/api/internal/company-graph-readiness'
     || pathname === '/api/internal/operating-health'
   ) {
     return NextResponse.next();
