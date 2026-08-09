@@ -10,6 +10,7 @@ import type {
   PressTranscript,
   PressSystemStatus,
   PressGenerationRun,
+  PressJobSummary,
 } from "./types";
 
 interface RawProject {
@@ -101,6 +102,18 @@ interface RawGenerationRun {
   updated_at: string;
 }
 
+interface RawJobSummary {
+  id: string;
+  type: string;
+  status: string;
+  progress: number;
+  attempts: number;
+  maxAttempts: number;
+  errorMessage?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 function normalizeAsset(asset: RawAsset): PressAsset {
   return {
     id: asset.id,
@@ -114,7 +127,7 @@ function normalizeAsset(asset: RawAsset): PressAsset {
   };
 }
 
-function normalizeProject(project: RawProject, assets?: RawAsset[], renders?: RawRender[]): PressProject {
+function normalizeProject(project: RawProject, assets?: RawAsset[], renders?: RawRender[], jobs?: RawJobSummary[]): PressProject {
   return {
     id: project.id,
     title: project.title,
@@ -125,6 +138,7 @@ function normalizeProject(project: RawProject, assets?: RawAsset[], renders?: Ra
     assets: assets?.map(normalizeAsset),
     renders: renders?.map(normalizeRender),
     errorMessage: project.metadata?.errorMessage || null,
+    latestJob: jobs?.[0] as PressJobSummary | undefined,
   };
 }
 
@@ -306,8 +320,8 @@ export async function finalizeAsset(assetId: string): Promise<void> {
 }
 
 export async function getPressProject(projectId: string, signal?: AbortSignal): Promise<PressProject> {
-  const data = await request<{ project: RawProject; assets: RawAsset[]; renders: RawRender[] }>(`/api/press/projects/${projectId}`, { signal });
-  return normalizeProject(data.project, data.assets, data.renders);
+  const data = await request<{ project: RawProject; assets: RawAsset[]; renders: RawRender[]; jobs: RawJobSummary[] }>(`/api/press/projects/${projectId}`, { signal });
+  return normalizeProject(data.project, data.assets, data.renders, data.jobs);
 }
 
 export async function updatePressProject(

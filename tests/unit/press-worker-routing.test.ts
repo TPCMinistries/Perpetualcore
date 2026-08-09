@@ -7,6 +7,10 @@ const claimRouteSource = readFileSync(
   resolve(process.cwd(), "app/api/press/worker/jobs/claim/route.ts"),
   "utf8",
 );
+const reportRouteSource = readFileSync(
+  resolve(process.cwd(), "app/api/press/worker/jobs/[jobId]/report/route.ts"),
+  "utf8",
+);
 
 describe("Press worker routing contract", () => {
   it("lets the authenticated queue worker reach its claim route", () => {
@@ -15,5 +19,11 @@ describe("Press worker routing contract", () => {
     expect(proxySource).toContain("pathname.startsWith('/api/press/worker/')");
     expect(claimRouteSource).toContain("requireWorkerAuthorization");
     expect(claimRouteSource).toContain('from("press_worker_heartbeats").upsert');
+  });
+
+  it("requires the unique claim token on every worker report", () => {
+    expect(claimRouteSource).toContain("leaseToken: job.lease_token");
+    expect(reportRouteSource).toContain("job.lease_token !== input.leaseToken");
+    expect(reportRouteSource).toContain('.eq("lease_token", input.leaseToken)');
   });
 });

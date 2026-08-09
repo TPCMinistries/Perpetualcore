@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowUpRight, LogOut } from "lucide-react";
 import { getUser, signOut } from "@/lib/auth/actions";
+import { canProvisionPressWorkspace } from "@/lib/press/auth";
 
 export const metadata = {
   title: "Press Studio",
@@ -15,8 +16,15 @@ export default async function PressStudioLayout({ children }: { children: React.
     redirect("/login?next=/press/studio");
   }
 
+  if (!canProvisionPressWorkspace(user.email)) {
+    redirect("https://press.perpetualcore.com/access?reason=invite");
+  }
+
   return (
-    <div className="min-h-screen bg-[#fffdf8] text-[#121214]">
+    <div className="public-light min-h-screen bg-[#fffdf8] text-[#121214]">
+      <a href="#press-main" className="sr-only z-[60] bg-white px-4 py-3 text-sm font-semibold text-black focus:not-sr-only focus:fixed focus:left-3 focus:top-3">
+        Skip to Press workspace
+      </a>
       <header className="sticky top-0 z-40 border-b border-black/10 bg-[#fffdf8]/90 backdrop-blur-xl">
         <div className="mx-auto flex h-[72px] max-w-[1480px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
           <Link
@@ -47,6 +55,7 @@ export default async function PressStudioLayout({ children }: { children: React.
             <form action={signOut}>
               <button
                 type="submit"
+                aria-label="Sign out of Press"
                 className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-black/15 bg-white px-4 text-sm font-semibold transition-colors duration-200 hover:border-black/30 hover:bg-black/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1648d8]"
               >
                 <LogOut className="h-4 w-4" aria-hidden />
@@ -57,7 +66,7 @@ export default async function PressStudioLayout({ children }: { children: React.
         </div>
       </header>
 
-      <main className="mx-auto max-w-[1480px] px-4 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-12">
+      <main id="press-main" className="mx-auto max-w-[1480px] px-4 py-8 sm:px-6 sm:py-10 lg:px-10 lg:py-12">
         {children}
       </main>
 

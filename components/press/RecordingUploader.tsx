@@ -8,19 +8,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { createPressProject, createUploadIntent, finalizeAsset, getErrorMessage, updatePressProject } from "./api-client";
+import { PRESS_ACCEPTED_MIME_TYPE_SET, PRESS_MAX_FILE_BYTES } from "@/lib/press/media";
+import { createPressProject, createUploadIntent, finalizeAsset, getErrorMessage } from "./api-client";
 import type { PressProject } from "./types";
-
-const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024;
-const ACCEPTED_TYPES = new Set([
-  "video/mp4",
-  "video/quicktime",
-  "video/webm",
-  "audio/mpeg",
-  "audio/mp4",
-  "audio/wav",
-  "audio/x-m4a",
-]);
 
 function formatBytes(bytes: number): string {
   const units = ["B", "KB", "MB", "GB"];
@@ -50,14 +40,14 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
   function selectFile(nextFile: File) {
     setError(null);
     setRightsAttested(false);
-    if (!ACCEPTED_TYPES.has(nextFile.type)) {
+    if (!PRESS_ACCEPTED_MIME_TYPE_SET.has(nextFile.type)) {
       setFile(null);
       setError("Choose an MP4, MOV, WebM, MP3, M4A, or WAV recording.");
       return;
     }
-    if (nextFile.size > MAX_FILE_SIZE) {
+    if (nextFile.size > PRESS_MAX_FILE_BYTES) {
       setFile(null);
-      setError("This recording is larger than the 2 GB upload limit.");
+      setError("This recording is larger than the 512 MB pilot upload limit.");
       return;
     }
     setFile(nextFile);
@@ -104,12 +94,7 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
       setRightsAttested(false);
     } catch (uploadError) {
       if (createdProject) {
-        try {
-          const failedProject = await updatePressProject(createdProject.id, { status: "failed" });
-          onComplete(failedProject);
-        } catch {
-          // Preserve the original upload error; the incomplete project remains recoverable by an operator.
-        }
+        onComplete(createdProject);
       }
       setProgress(0);
       setStatus("");
@@ -167,6 +152,7 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
           ref={inputRef}
           type="file"
           className="sr-only"
+          tabIndex={-1}
           accept="video/mp4,video/quicktime,video/webm,audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,.mp4,.mov,.webm,.mp3,.m4a,.wav"
           disabled={uploading}
           onChange={(event) => {
@@ -179,7 +165,7 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
           <Upload className="h-6 w-6 text-black" aria-hidden />
         </span>
         <p className="mt-4 text-base font-black text-[#121214]">Drop it here or choose a file</p>
-        <p className="mt-1 text-xs text-black/50">Video or audio · MP4, MOV, WebM, MP3, M4A, WAV · up to 2 GB</p>
+        <p className="mt-1 text-xs text-black/60">Video or audio · MP4, MOV, WebM, MP3, M4A, WAV · up to 512 MB during the pilot</p>
       </div>
 
       {processingMessage && (

@@ -27,6 +27,14 @@ const workspaceOnboardingSql = readFileSync(
   resolve(process.cwd(), "supabase/migrations/20260808110616_press_workspace_onboarding.sql"),
   "utf8",
 );
+const pilotLimitsSql = readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20260809190000_press_atomic_finalize_and_pilot_limits.sql"),
+  "utf8",
+);
+const jobFencingSql = readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20260809193000_press_job_fencing_and_result_idempotency.sql"),
+  "utf8",
+);
 
 describe("Press foundation migration security contract", () => {
   it("defines every runtime table with RLS", () => {
@@ -161,5 +169,24 @@ describe("Press foundation migration security contract", () => {
     expect(workspaceOnboardingSql).toContain(
       "GRANT EXECUTE ON FUNCTION public.press_ensure_workspace(uuid) TO service_role",
     );
+  });
+
+  it("reserves and finalizes pilot uploads atomically behind service-role RPCs", () => {
+    expect(pilotLimitsSql).toContain("pg_advisory_xact_lock");
+    expect(pilotLimitsSql).toContain("v_reserved_bytes + p_file_size > 10737418240");
+    expect(pilotLimitsSql).toContain("p_file_size NOT BETWEEN 1 AND 536870912");
+    expect(pilotLimitsSql).toContain("ON CONFLICT (idempotency_key) DO UPDATE");
+    expect(pilotLimitsSql).toContain("REVOKE ALL ON FUNCTION public.press_reserve_asset_upload");
+    expect(pilotLimitsSql).toContain("REVOKE ALL ON FUNCTION public.press_finalize_asset_upload");
+    expect(pilotLimitsSql).toContain("TO service_role");
+    expect(pilotLimitsSql).toContain("'audio/x-m4a'");
+  });
+
+  it("fences worker leases and makes retryable results idempotent by job", () => {
+    expect(jobFencingSql).toContain("lease_token = gen_random_uuid()");
+    expect(jobFencingSql).toContain("press_replace_transcript_for_job");
+    expect(jobFencingSql).toContain("WHERE source_job_id = p_job_id");
+    expect(jobFencingSql).toContain("press_clips_source_job_position_uidx");
+    expect(jobFencingSql).toContain("REVOKE ALL ON FUNCTION public.press_replace_transcript_for_job");
   });
 });

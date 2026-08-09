@@ -20,12 +20,13 @@ export function PressConsolePage() {
     setLoading(true);
     setError(null);
     try {
-      const [nextProjects, nextSystemStatus] = await Promise.all([
+      const [projectsResult, statusResult] = await Promise.allSettled([
         listPressProjects(signal),
         getPressSystemStatus(signal),
       ]);
-      setProjects(nextProjects);
-      setSystemStatus(nextSystemStatus);
+      if (projectsResult.status === "rejected") throw projectsResult.reason;
+      setProjects(projectsResult.value);
+      setSystemStatus(statusResult.status === "fulfilled" ? statusResult.value : null);
     } catch (loadError) {
       if (loadError instanceof DOMException && loadError.name === "AbortError") return;
       setError(getErrorMessage(loadError));

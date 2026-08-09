@@ -7,17 +7,25 @@ import {
   asPublication, asPublishTarget, getPublishCapabilities,
   requireClip, requireProject, requireRender,
 } from "@/lib/press/service";
-import { requirePressUser } from "@/lib/press/auth";
-import { requireOrganizationAccess } from "@/lib/press/auth";
+import {
+  PRESS_ADMIN_ROLES,
+  PRESS_EDITOR_ROLES,
+  requireOrganizationAccess,
+  requirePressUser,
+} from "@/lib/press/auth";
+import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
     const input = createPublicationSchema.parse(await request.json());
-    const render = await requireRender(input.renderId);
+    const render = await requireRender(input.renderId, PRESS_EDITOR_ROLES);
     if (render.status !== "completed" || !render.output_bucket || !render.output_path) {
       return NextResponse.json({ error: "A completed render is required" }, { status: 409 });
     }
-    const [clip, project] = await Promise.all([requireClip(render.clip_id), requireProject(render.project_id)]);
+    const [clip, project] = await Promise.all([
+      requireClip(render.clip_id, PRESS_EDITOR_ROLES),
+      requireProject(render.project_id, PRESS_EDITOR_ROLES),
+    ]);
     if (clip.project_id !== project.id || render.clip_id !== clip.id) {
       return NextResponse.json({ error: "Render lineage is invalid" }, { status: 409 });
     }
@@ -32,10 +40,7 @@ export async function POST(request: NextRequest) {
     let target: ReturnType<typeof asPublishTarget> | null = null;
     let capabilities = { manualExport: true, scheduling: false, directPublish: false };
     if (input.mode === "scheduled") {
-      const access = await requireOrganizationAccess(project.organization_id);
-      if (!(["owner", "admin"] as string[]).includes(access.role)) {
-        return NextResponse.json({ error: "Owner or admin role is required to schedule publishing" }, { status: 403 });
-      }
+      await requireOrganizationAccess(project.organization_id, PRESS_ADMIN_ROLES);
       const { data: targetData, error: targetError } = await admin.from("press_publish_targets")
         .select("id, organization_id, provider, account_label, external_account_id, status, adapter_configured, non_secret_config, created_at, updated_at")
         .eq("id", input.publishTargetId ?? "").eq("organization_id", project.organization_id).maybeSingle();
@@ -49,6 +54,8 @@ export async function POST(request: NextRequest) {
     }
 
     const { user } = await requirePressUser();
+    const rateLimited = await checkPressMutationRateLimit(request, user.id);
+    if (rateLimited) return rateLimited;
     const idempotencyKey = input.idempotencyKey ?? `${input.mode}:${render.id}:${target?.id ?? "manual"}:${randomUUID()}`;
     const insert = {
       organization_id: project.organization_id, project_id: project.id, clip_id: clip.id,

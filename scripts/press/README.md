@@ -66,11 +66,11 @@ Run continuously under a process supervisor:
 npx tsx scripts/press/queue-worker.ts
 ```
 
-The consumer downloads the signed source before its 15-minute expiry, sends a progress heartbeat, processes in a mode-`0600` temporary directory, reports a schema-validated result, and removes the directory in `finally`. A production supervisor should add host-level CPU/memory/disk limits and restart backoff.
+The consumer downloads the signed source before its 15-minute expiry, rejects downloads above `PRESS_WORKER_MAX_DOWNLOAD_BYTES` (512 MB by default), caps each FFmpeg/Whisper subprocess at `PRESS_WORKER_PROCESS_TIMEOUT_MS` (30 minutes by default), bounds captured process output, sends a progress heartbeat, processes in a mode-`0600` temporary directory, reports a schema-validated result, and removes the directory in `finally`. The idle poll defaults to 60 seconds. A production supervisor should still add host-level CPU/memory limits and restart backoff.
 
 ### Current production worker
 
-The production worker is launched by `scripts/press/run-production-worker.sh` through the user LaunchAgent `com.perpetualcore.press-worker`. Its shared secret is read from the macOS Keychain service `com.perpetualcore.press-worker`; the launch file and repository contain no secret. Logs are written to `~/Library/Logs/perpetual-core-press-worker.log` and `~/Library/Logs/perpetual-core-press-worker.error.log`.
+The production worker is launched by `scripts/press/run-production-worker.sh` through the user LaunchAgent `com.perpetualcore.press-worker`. The runner resolves its repository from its own location, uses `PRESS_NODE_BIN` when Node is not on the service path, and reads its shared secret from the current macOS user's Keychain service `com.perpetualcore.press-worker`; the launch file and repository contain no secret. Logs are written to the LaunchAgent paths configured by the operator.
 
 Useful operator commands:
 

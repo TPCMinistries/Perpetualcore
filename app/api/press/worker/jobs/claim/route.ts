@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
     const claimed = claimedRows?.[0];
     if (!claimed) return NextResponse.json({ job: null });
     const job = asJob(claimed);
+    if (!job.lease_token) throw new PressHttpError(500, "Claimed Press job has no lease token");
     const { error: jobHeartbeatError } = await admin.from("press_worker_heartbeats").update({
       last_seen_at: heartbeatAt,
       current_job_id: job.id,
@@ -195,6 +196,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       job: {
         ...job,
+        leaseToken: job.lease_token,
         input: inputData,
       },
     });

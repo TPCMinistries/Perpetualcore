@@ -28,7 +28,17 @@ describe("Press request schemas", () => {
     expect(() => uploadIntentSchema.parse({
       fileName: "archive.mp4",
       mimeType: "video/mp4",
-      fileSize: (2 * 1024 * 1024 * 1024) + 1,
+      fileSize: (512 * 1024 * 1024) + 1,
+    })).toThrow();
+    expect(uploadIntentSchema.parse({
+      fileName: "interview.m4a",
+      mimeType: "audio/x-m4a",
+      fileSize: 1024,
+    }).mimeType).toBe("audio/x-m4a");
+    expect(() => uploadIntentSchema.parse({
+      fileName: "unexpected.ogg",
+      mimeType: "audio/ogg",
+      fileSize: 1024,
     })).toThrow();
     expect(() => uploadIntentSchema.parse({
       fileName: "payload.html",
@@ -71,6 +81,7 @@ describe("Press request schemas", () => {
     expect(() => reportJobSchema.parse({ workerId: "press-worker-1", status: "failed" })).toThrow();
     expect(reportJobSchema.parse({
       workerId: "press-worker-1",
+      leaseToken: "11111111-1111-4111-8111-111111111111",
       status: "failed",
       errorMessage: "FFmpeg exited with code 1",
     }).status).toBe("failed");

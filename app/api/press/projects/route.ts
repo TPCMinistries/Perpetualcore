@@ -5,6 +5,8 @@ import { createPressAdminClient } from "@/lib/press/db";
 import { requirePressUser } from "@/lib/press/auth";
 import { asProject, resolveOrganizationId, rows } from "@/lib/press/service";
 import type { PressProject } from "@/lib/press/types";
+import { assertPressProjectCapacity } from "@/lib/press/limits";
+import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -39,7 +41,10 @@ export async function POST(request: NextRequest) {
     const input = createProjectSchema.parse(await request.json());
     const organizationId = await resolveOrganizationId(input.organizationId);
     const { user } = await requirePressUser();
+    const rateLimited = await checkPressMutationRateLimit(request, user.id);
+    if (rateLimited) return rateLimited;
     const admin = createPressAdminClient();
+    await assertPressProjectCapacity(admin, organizationId);
     const { data, error } = await admin.from("press_projects").insert({
       organization_id: organizationId, created_by: user.id, brand_id: input.brandId ?? null,
       title: input.title, status: "draft", platforms: input.platforms, metadata: {},

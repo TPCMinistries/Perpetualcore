@@ -12,7 +12,7 @@ import { createReadStream, createWriteStream } from "node:fs";
 import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
-import { Readable } from "node:stream";
+import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { spawn } from "node:child_process";
 
@@ -29,6 +29,7 @@ interface InputSegment {
 
 interface ClaimedJob {
   id: string;
+  leaseToken: string;
   job_type: SupportedJobType;
   input: {
     sourceUrl: string | null;
@@ -70,18 +71,34 @@ interface WhisperJson {
 const apiBase = (process.env.PRESS_API_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const workerSecret = process.env.PRESS_WORKER_SECRET ?? "";
 const workerId = process.env.PRESS_WORKER_ID ?? `press-local-${process.pid}`;
-const pollMs = Number(process.env.PRESS_WORKER_POLL_MS ?? "5000");
+const pollMs = Number(process.env.PRESS_WORKER_POLL_MS ?? "60000");
+const processTimeoutMs = Number(process.env.PRESS_WORKER_PROCESS_TIMEOUT_MS ?? String(30 * 60_000));
+const maxDownloadBytes = Number(process.env.PRESS_WORKER_MAX_DOWNLOAD_BYTES ?? String(512 * 1024 * 1024));
 const once = process.argv.includes("--once");
 
 function run(command: string, args: string[], cwd?: string): Promise<string> {
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(command, args, { cwd, stdio: ["ignore", "pipe", "pipe"], shell: false });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), processTimeoutMs);
+    const child = spawn(command, args, {
+      cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+      shell: false,
+      signal: controller.signal,
+      killSignal: "SIGKILL",
+    });
     let stdout = "";
     let stderr = "";
-    child.stdout.on("data", (chunk: Buffer) => (stdout += chunk.toString()));
-    child.stderr.on("data", (chunk: Buffer) => (stderr += chunk.toString()));
-    child.on("error", reject);
+    const appendBounded = (current: string, chunk: Buffer) =>
+      (current + chunk.toString()).slice(-2_000_000);
+    child.stdout.on("data", (chunk: Buffer) => (stdout = appendBounded(stdout, chunk)));
+    child.stderr.on("data", (chunk: Buffer) => (stderr = appendBounded(stderr, chunk)));
+    child.on("error", (error) => {
+      clearTimeout(timeout);
+      reject(error);
+    });
     child.on("close", (code) => {
+      clearTimeout(timeout);
       if (code === 0) resolvePromise(stdout);
       else reject(new Error(`${basename(command)} exited ${code}: ${stderr.slice(-2000)}`));
     });
@@ -106,11 +123,12 @@ async function api<T>(path: string, body: Record<string, unknown>): Promise<T> {
 }
 
 async function report(
-  jobId: string,
+  job: Pick<ClaimedJob, "id" | "leaseToken">,
   body: Record<string, unknown>,
 ): Promise<void> {
-  await api(`/api/press/worker/jobs/${encodeURIComponent(jobId)}/report`, {
+  await api(`/api/press/worker/jobs/${encodeURIComponent(job.id)}/report`, {
     workerId,
+    leaseToken: job.leaseToken,
     ...body,
   });
 }
@@ -118,8 +136,24 @@ async function report(
 async function downloadSource(url: string, target: string): Promise<void> {
   const response = await fetch(url, { redirect: "error", signal: AbortSignal.timeout(15 * 60_000) });
   if (!response.ok || !response.body) throw new Error(`Source download failed (${response.status})`);
+  const declaredLength = Number(response.headers.get("content-length"));
+  if (Number.isFinite(declaredLength) && declaredLength > maxDownloadBytes) {
+    throw new Error("Source exceeds the worker download limit");
+  }
+  let receivedBytes = 0;
+  const byteLimit = new Transform({
+    transform(chunk: Buffer, _encoding, callback) {
+      receivedBytes += chunk.length;
+      if (receivedBytes > maxDownloadBytes) {
+        callback(new Error("Source exceeds the worker download limit"));
+        return;
+      }
+      callback(null, chunk);
+    },
+  });
   await pipeline(
     Readable.fromWeb(response.body as import("node:stream/web").ReadableStream),
+    byteLimit,
     createWriteStream(target, { mode: 0o600 }),
   );
 }
@@ -135,6 +169,16 @@ function scoreTranscript(
   const maxDurationMs = Number.isFinite(configuredMax) ? Math.min(120, configuredMax) * 1000 : 60_000;
   const maxClips = Number.isFinite(configuredCount) ? Math.min(12, Math.max(3, configuredCount)) : 10;
   const briefKeywords = (generation?.brief ?? "").toLowerCase().match(/[a-z0-9]{5,}/g)?.slice(0, 20) ?? [];
+  const configuredGoals = Array.isArray(generation?.config.goals)
+    ? generation.config.goals.filter((goal): goal is string => typeof goal === "string")
+    : [];
+  const goalSignals: Record<string, RegExp> = {
+    teach: /\b(how|why|step|learn|because|lesson|method)\b/i,
+    inspire: /\b(can|believe|imagine|possible|change|hope|future)\b/i,
+    announce: /\b(new|introducing|launch|today|now|announce|available)\b/i,
+    demonstrate: /\b(show|watch|here|example|demo|look|see)\b/i,
+    story: /\b(when|remember|then|felt|story|happened|realized)\b/i,
+  };
   const candidates: InputSegment[][] = [];
   for (let start = 0; start < segments.length; start += 1) {
     const group: InputSegment[] = [];
@@ -171,6 +215,10 @@ function scoreTranscript(
     const editorialRelevance = briefKeywords.length
       ? Math.min(100, 45 + keywordMatches * 15)
       : 70;
+    const matchedGoals = configuredGoals.filter((goal) => goalSignals[goal]?.test(text)).length;
+    const goalAlignment = configuredGoals.length
+      ? Math.min(100, 40 + (matchedGoals / configuredGoals.length) * 60)
+      : 70;
     const scores = {
       hook: Math.round(hook),
       duration_fit: Math.round(durationFit),
@@ -178,11 +226,12 @@ function scoreTranscript(
       standalone,
       transcript_confidence: confidence,
       editorial_relevance: editorialRelevance,
+      goal_alignment: Math.round(goalAlignment),
     };
     const score = Math.round(
-      scores.hook * 0.25 + scores.duration_fit * 0.2 + scores.clarity * 0.15
+      scores.hook * 0.2 + scores.duration_fit * 0.18 + scores.clarity * 0.14
       + scores.standalone * 0.15 + scores.transcript_confidence * 0.1
-      + scores.editorial_relevance * 0.15,
+      + scores.editorial_relevance * 0.13 + scores.goal_alignment * 0.1,
     );
     const firstSentence = text.split(/(?<=[.!?])\s+/)[0] ?? text;
     return {
@@ -245,7 +294,7 @@ async function processJob(job: ClaimedJob): Promise<Record<string, unknown>> {
   try {
     const sourcePath = join(workDir, "source-media");
     await downloadSource(job.input.sourceUrl, sourcePath);
-    await report(job.id, { status: "processing", progress: 10 });
+    await report(job, { status: "processing", progress: 10 });
 
     const probeRaw = await run("ffprobe", [
       "-v", "error", "-show_format", "-show_streams", "-of", "json", sourcePath,
@@ -313,7 +362,7 @@ async function processJob(job: ClaimedJob): Promise<Record<string, unknown>> {
         "-c:v", "libx264", "-preset", "medium", "-crf", "20",
         "-c:a", "aac", "-b:a", "128k", "-movflags", "+faststart", outputPath,
       ], workDir);
-      await report(job.id, { status: "processing", progress: 85 });
+      await report(job, { status: "processing", progress: 85 });
       await uploadFile(outputUpload.uploadUrl, outputPath, "video/mp4");
       return { outputBucket: outputUpload.bucket, outputPath: outputUpload.path };
     }
@@ -406,7 +455,7 @@ async function tick(): Promise<boolean> {
 
   let lastProgress = 5;
   const heartbeat = setInterval(() => {
-    void report(response.job!.id, { status: "processing", progress: lastProgress })
+    void report(response.job!, { status: "processing", progress: lastProgress })
       .catch((error: unknown) => {
         process.stderr.write(`Press job heartbeat failed: ${String(error)}\n`);
       });
@@ -415,11 +464,11 @@ async function tick(): Promise<boolean> {
     const result = await processJob(response.job);
     lastProgress = 95;
     clearInterval(heartbeat);
-    await report(response.job.id, { status: "completed", progress: 100, result });
+    await report(response.job, { status: "completed", progress: 100, result });
   } catch (error) {
     clearInterval(heartbeat);
     const message = error instanceof Error ? error.message : String(error);
-    await report(response.job.id, {
+    await report(response.job, {
       status: "failed",
       errorMessage: message.slice(0, 4000),
     }).catch((reportError: unknown) => {
@@ -434,6 +483,12 @@ async function tick(): Promise<boolean> {
 async function main(): Promise<void> {
   if (!workerSecret) throw new Error("PRESS_WORKER_SECRET is required");
   if (!Number.isFinite(pollMs) || pollMs < 1000) throw new Error("PRESS_WORKER_POLL_MS must be >= 1000");
+  if (!Number.isFinite(processTimeoutMs) || processTimeoutMs < 60_000) {
+    throw new Error("PRESS_WORKER_PROCESS_TIMEOUT_MS must be >= 60000");
+  }
+  if (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes < 1024 * 1024) {
+    throw new Error("PRESS_WORKER_MAX_DOWNLOAD_BYTES must be >= 1048576");
+  }
   do {
     const worked = await tick();
     if (once) return;

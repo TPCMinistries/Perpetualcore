@@ -4,7 +4,9 @@ import { pressErrorResponse } from "@/lib/press/http";
 import { createAuthenticClipPackSchema } from "@/lib/press/schemas";
 import { asGenerationRun, requireProject, rows } from "@/lib/press/service";
 import type { PressGenerationRun } from "@/lib/press/types";
-import { requirePressUser } from "@/lib/press/auth";
+import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
+import { assertPressJobCapacity } from "@/lib/press/limits";
+import { checkPressJobRateLimit } from "@/lib/press/rate-limit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -25,10 +27,13 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
   try {
-    const project = await requireProject((await params).projectId);
+    const project = await requireProject((await params).projectId, PRESS_EDITOR_ROLES);
     const input = createAuthenticClipPackSchema.parse(await request.json());
     const { user } = await requirePressUser();
+    const rateLimited = await checkPressJobRateLimit(request, user.id);
+    if (rateLimited) return rateLimited;
     const admin = createPressAdminClient();
+    await assertPressJobCapacity(admin, project.organization_id);
     const { data, error } = await admin.rpc("press_queue_authentic_clip_pack", {
       p_organization_id: project.organization_id,
       p_project_id: project.id,

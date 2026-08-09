@@ -60,6 +60,7 @@ export interface PressJob {
   error_message: string | null;
   lease_owner: string | null;
   lease_expires_at: string | null;
+  lease_token: string | null;
   idempotency_key: string;
   created_at: string;
   updated_at: string;

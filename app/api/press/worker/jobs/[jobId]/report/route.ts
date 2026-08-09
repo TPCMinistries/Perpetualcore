@@ -98,7 +98,8 @@ async function applyCompletedResult(job: PressJob, result: Record<string, unknow
       }).eq("id", artifact.assetId).eq("organization_id", job.organization_id);
       if (artifactError) throw artifactError;
     }
-    const { data: transcriptRows, error } = await admin.rpc("press_replace_transcript", {
+    const { data: transcriptRows, error } = await admin.rpc("press_replace_transcript_for_job", {
+      p_job_id: job.id,
       p_project_id: job.project_id,
       p_asset_id: job.asset_id,
       p_full_text: parsed.fullText,
@@ -125,14 +126,15 @@ async function applyCompletedResult(job: PressJob, result: Record<string, unknow
   } else if (job.job_type === "score_clips") {
     const parsed = scoreClipsResultSchema.parse(result);
     if (parsed.clips.length) {
-      const { error } = await admin.from("press_clips").insert(parsed.clips.map((clip) => ({
+      const { error } = await admin.from("press_clips").upsert(parsed.clips.map((clip, position) => ({
+        id: derivedAssetId(job.id, `clip-${position}`),
         project_id: job.project_id, organization_id: job.organization_id,
-        generation_run_id: job.generation_run_id, version: 1,
+        generation_run_id: job.generation_run_id, source_job_id: job.id, source_position: position, version: 1,
         start_ms: clip.startMs, end_ms: clip.endMs, title: clip.title,
         hook: clip.hook ?? null, summary: clip.summary ?? null, score: clip.score,
         scores: clip.scores, status: "proposed", rejection_reason: null,
         reviewed_by: null, reviewed_at: null,
-      })));
+      })), { onConflict: "source_job_id,source_position", ignoreDuplicates: true });
       if (error) throw error;
     }
     await admin.from("press_projects").update({ status: "review", updated_at: now })
@@ -157,15 +159,29 @@ async function applyCompletedResult(job: PressJob, result: Record<string, unknow
     const { data: render } = await admin.from("press_renders").select("clip_id")
       .eq("id", job.render_id).maybeSingle();
     if (render?.clip_id) {
-      await admin.from("press_clips").update({ status: "rendered", updated_at: now })
+      const { data: siblingRenders, error: siblingError } = await admin.from("press_renders")
+        .select("status")
+        .eq("clip_id", String(render.clip_id))
+        .eq("organization_id", job.organization_id);
+      if (siblingError) throw siblingError;
+      const siblingStatuses = (siblingRenders ?? []).map((item) => item.status);
+      const clipStatus = siblingStatuses.length > 0 && siblingStatuses.every((status) => status === "completed")
+        ? "rendered"
+        : "rendering";
+      await admin.from("press_clips").update({ status: clipStatus, updated_at: now })
         .eq("id", String(render.clip_id)).eq("organization_id", job.organization_id);
     }
-    const { count } = await admin.from("press_renders").select("id", { count: "exact", head: true })
-      .eq("project_id", job.project_id).in("status", ["queued", "rendering"]);
-    if ((count ?? 0) === 0) {
-      await admin.from("press_projects").update({ status: "ready", updated_at: now })
-        .eq("id", job.project_id).eq("organization_id", job.organization_id);
-    }
+    const { data: projectRenders, error: projectRenderError } = await admin.from("press_renders")
+      .select("status").eq("project_id", job.project_id).eq("organization_id", job.organization_id);
+    if (projectRenderError) throw projectRenderError;
+    const statuses = (projectRenders ?? []).map((item) => item.status);
+    const projectStatus = statuses.length > 0 && statuses.every((status) => status === "completed")
+      ? "ready"
+      : statuses.some((status) => status === "failed") && !statuses.some((status) => status === "queued" || status === "rendering")
+        ? "failed"
+        : "rendering";
+    await admin.from("press_projects").update({ status: projectStatus, updated_at: now })
+      .eq("id", job.project_id).eq("organization_id", job.organization_id);
   }
 }
 
@@ -187,7 +203,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (error) throw error;
     if (!data) throw new PressHttpError(404, "Press job not found");
     const job = asJob(data);
-    if (job.status !== "processing" || job.lease_owner !== input.workerId) {
+    if (
+      job.status !== "processing"
+      || job.lease_owner !== input.workerId
+      || job.lease_token !== input.leaseToken
+      || !job.lease_expires_at
+      || new Date(job.lease_expires_at).getTime() <= Date.now()
+    ) {
       return NextResponse.json({ error: "Worker does not own this job lease" }, { status: 409 });
     }
     const { error: heartbeatError } = await admin.from("press_worker_heartbeats").upsert({
@@ -206,12 +228,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       updated_at: new Date().toISOString(),
     };
     if (input.status !== "processing") {
-      updates.lease_owner = null; updates.lease_expires_at = null;
+      updates.lease_owner = null; updates.lease_expires_at = null; updates.lease_token = null;
     } else {
       updates.lease_expires_at = new Date(Date.now() + 300_000).toISOString();
     }
     const { data: updated, error: updateError } = await admin.from("press_jobs").update(updates)
-      .eq("id", job.id).eq("lease_owner", input.workerId).select("*").single();
+      .eq("id", job.id)
+      .eq("lease_owner", input.workerId)
+      .eq("lease_token", input.leaseToken)
+      .select("*")
+      .single();
     if (updateError) throw updateError;
     if (terminalFailure) {
       await admin.from("press_projects").update({ status: "failed", updated_at: new Date().toISOString() })
@@ -223,6 +249,19 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       if (job.render_id) {
         await admin.from("press_renders").update({ status: "failed", updated_at: new Date().toISOString() })
           .eq("id", job.render_id).eq("organization_id", job.organization_id);
+        const { data: failedRender } = await admin.from("press_renders").select("clip_id")
+          .eq("id", job.render_id).eq("organization_id", job.organization_id).maybeSingle();
+        if (failedRender?.clip_id) {
+          const { count: activeSiblingCount } = await admin.from("press_renders")
+            .select("id", { count: "exact", head: true })
+            .eq("clip_id", String(failedRender.clip_id))
+            .eq("organization_id", job.organization_id)
+            .in("status", ["queued", "rendering"]);
+          if ((activeSiblingCount ?? 0) === 0) {
+            await admin.from("press_clips").update({ status: "approved", updated_at: new Date().toISOString() })
+              .eq("id", String(failedRender.clip_id)).eq("organization_id", job.organization_id);
+          }
+        }
       }
       if (job.generation_run_id) {
         await admin.from("press_generation_runs").update({
