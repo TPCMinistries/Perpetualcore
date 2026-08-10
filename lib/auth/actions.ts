@@ -17,6 +17,11 @@ type BetaInviteCode = Database["public"]["Tables"]["beta_invite_codes"]["Row"];
  */
 async function getRequestOrigin(): Promise<string> {
   const h = await headers();
+  // The Press domain router proxies product routes here cross-origin and
+  // asserts the customer-facing origin in this header. Only the known press
+  // domain is honored so the header cannot redirect auth elsewhere.
+  const pressOrigin = h.get("x-press-app-origin");
+  if (pressOrigin === "https://press.perpetualcore.com") return pressOrigin;
   const host = h.get("x-forwarded-host") ?? h.get("host");
   const proto = h.get("x-forwarded-proto") ?? "https";
   if (host) return `${proto}://${host}`;
