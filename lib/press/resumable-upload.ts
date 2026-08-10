@@ -42,7 +42,10 @@ export function createPressResumableUpload(input: PressTusUploadInput): Upload {
     storeFingerprintForResuming: true,
     headers: {
       apikey: publishableKey,
-      "x-signature": input.token,
+      // The TUS endpoint authenticates via Authorization; the signed upload
+      // token from createSignedUploadUrl is a valid JWS for this. Sending it
+      // as x-signature is rejected with "Invalid Compact JWS".
+      authorization: `Bearer ${input.token}`,
     },
     metadata: {
       bucketName: input.bucket,
@@ -70,4 +73,62 @@ export async function startPressResumableUpload(upload: Upload): Promise<void> {
     .sort((left, right) => right.creationTime.localeCompare(left.creationTime))[0];
   if (previous) upload.resumeFromPreviousUpload(previous);
   upload.start();
+}
+
+/**
+ * The hosted TUS endpoint can be unavailable for reasons unrelated to this
+ * upload (e.g. "The database schema is invalid or incompatible" while the
+ * platform's storage schema and serving version disagree). Those failures
+ * happen on the create request, before any bytes move, and are safe to
+ * retry over the plain signed-URL transport instead.
+ */
+export function isTusTransportUnavailable(error: Error | DetailedError): boolean {
+  const status = (error as DetailedError).originalResponse?.getStatus?.();
+  if (status === 503) return true;
+  return /schema is invalid|response code: 503/i.test(error.message ?? "");
+}
+
+export interface PressDirectUploadHandle {
+  abort: () => void;
+}
+
+/**
+ * Fallback transport: single PUT to the signed upload URL. No resume — a
+ * retry restarts from zero — but it does not depend on the TUS service.
+ */
+export function startPressDirectUpload(input: PressTusUploadInput): PressDirectUploadHandle {
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!publishableKey || !supabaseUrl) throw new Error("Press upload storage is not configured.");
+
+  const url = new URL(supabaseUrl);
+  url.pathname = `/storage/v1/object/upload/sign/${input.bucket}/${input.path}`;
+  url.search = `token=${encodeURIComponent(input.token)}`;
+
+  const xhr = new XMLHttpRequest();
+  let aborted = false;
+  xhr.open("PUT", url.toString());
+  xhr.setRequestHeader("apikey", publishableKey);
+  xhr.setRequestHeader("content-type", input.file.type || "application/octet-stream");
+  xhr.upload.onprogress = (event) => {
+    if (event.lengthComputable) input.onProgress(event.loaded, event.total);
+  };
+  xhr.onload = () => {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      input.onSuccess();
+    } else {
+      input.onError(new Error(`Upload failed (${xhr.status}): ${xhr.responseText.slice(0, 200)}`));
+    }
+  };
+  xhr.onerror = () => {
+    if (!aborted) input.onError(new Error("Upload failed: the connection was interrupted."));
+  };
+  xhr.send(input.file);
+
+  return {
+    abort: () => {
+      aborted = true;
+      xhr.abort();
+    },
+  };
 }
