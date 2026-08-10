@@ -4,7 +4,7 @@ import { createPressAdminClient } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { createPublicationSchema } from "@/lib/press/schemas";
 import {
-  asPublication, asPublishTarget, getPublishCapabilities,
+  asPublication, asPublishTarget, assertProjectIsMutable, getPublishCapabilities,
   requireClip, requireProject, requireRender,
 } from "@/lib/press/service";
 import {
@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     if (clip.project_id !== project.id || render.clip_id !== clip.id) {
       return NextResponse.json({ error: "Render lineage is invalid" }, { status: 409 });
     }
+    assertProjectIsMutable(project);
     if (!project.rights_attested_at || !project.rights_attested_by) {
       return NextResponse.json({ error: "Media rights attestation is required" }, { status: 403 });
     }

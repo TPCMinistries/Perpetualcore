@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPressAdminClient } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { clipActionSchema } from "@/lib/press/schemas";
-import { asClip, requireClip } from "@/lib/press/service";
+import { asClip, assertProjectIsMutable, requireClip, requireProject } from "@/lib/press/service";
 import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
 import { PRESS_MAX_CLIP_DURATION_MS } from "@/lib/press/media";
 import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
@@ -10,6 +10,7 @@ import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ clipId: string }> }) {
   try {
     const clip = await requireClip((await params).clipId, PRESS_EDITOR_ROLES);
+    assertProjectIsMutable(await requireProject(clip.project_id, PRESS_EDITOR_ROLES));
     const input = clipActionSchema.parse(await request.json());
     if (clip.version !== input.version) {
       return NextResponse.json({ error: "Clip changed", currentVersion: clip.version }, { status: 409 });

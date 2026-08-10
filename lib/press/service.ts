@@ -72,6 +72,12 @@ export async function requireProject(
   return project;
 }
 
+export function assertProjectIsMutable(project: PressProject): void {
+  if (project.status === "archived") {
+    throw new PressHttpError(409, "This recording is archived. Archived recordings cannot be changed or processed.");
+  }
+}
+
 export async function requireAsset(
   assetId: string,
   allowedRoles: readonly PressOrganizationRole[] = PRESS_READ_ROLES,

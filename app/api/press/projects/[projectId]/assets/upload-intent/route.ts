@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { PRESS_ASSET_BUCKET, createPressAdminClient } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { uploadIntentSchema } from "@/lib/press/schemas";
-import { asAsset, requireProject } from "@/lib/press/service";
+import { asAsset, assertProjectIsMutable, requireProject } from "@/lib/press/service";
 import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
 import { assertPressUploadCapacity } from "@/lib/press/limits";
 import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
@@ -18,6 +18,7 @@ function safeFileName(name: string): string {
 export async function POST(request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
   try {
     const project = await requireProject((await params).projectId, PRESS_EDITOR_ROLES);
+    assertProjectIsMutable(project);
     if (!project.rights_attested_at || !project.rights_attested_by) {
       return NextResponse.json({ error: "Media rights attestation is required before upload" }, { status: 403 });
     }

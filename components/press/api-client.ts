@@ -21,6 +21,7 @@ interface RawProject {
   created_at: string;
   updated_at: string;
   metadata?: { errorMessage?: string };
+  permissions?: PressProject["permissions"];
 }
 
 interface RawAsset {
@@ -110,6 +111,7 @@ interface RawJobSummary {
   attempts: number;
   maxAttempts: number;
   errorMessage?: string | null;
+  retryable?: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -139,6 +141,8 @@ function normalizeProject(project: RawProject, assets?: RawAsset[], renders?: Ra
     renders: renders?.map(normalizeRender),
     errorMessage: project.metadata?.errorMessage || null,
     latestJob: jobs?.[0] as PressJobSummary | undefined,
+    jobs: jobs as PressJobSummary[] | undefined,
+    permissions: project.permissions,
   };
 }
 
@@ -312,6 +316,13 @@ export function createUploadIntent(projectId: string, file: File): Promise<Press
   });
 }
 
+export function refreshUploadToken(assetId: string): Promise<{ upload: PressUploadIntent["upload"] }> {
+  return request<{ upload: PressUploadIntent["upload"] }>(`/api/press/assets/${assetId}/upload-token`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+}
+
 export async function finalizeAsset(assetId: string): Promise<void> {
   await request(`/api/press/assets/${assetId}/finalize`, {
     method: "POST",
@@ -333,6 +344,45 @@ export async function updatePressProject(
     body: JSON.stringify(updates),
   });
   return normalizeProject(data.project);
+}
+
+export async function retryPressJob(jobId: string): Promise<PressJobSummary> {
+  const data = await request<{ job: RawJobSummary }>(`/api/press/jobs/${jobId}/retry`, {
+    method: "POST",
+    body: JSON.stringify({}),
+  });
+  return data.job;
+}
+
+export async function deletePressProject(projectId: string, confirmationTitle: string): Promise<{ deleted: boolean; removedObjects: number }> {
+  return request(`/api/press/projects/${projectId}/delete`, {
+    method: "DELETE",
+    body: JSON.stringify({ confirmationTitle, acknowledgePermanentDelete: true }),
+  });
+}
+
+export async function downloadPressProjectExport(projectId: string): Promise<void> {
+  const response = await fetch(`/api/press/projects/${projectId}/export`, { cache: "no-store" });
+  if (!response.ok) {
+    let body: ApiErrorBody = {};
+    try {
+      body = (await response.json()) as ApiErrorBody;
+    } catch {
+      // Use the customer-facing fallback below.
+    }
+    throw new PressApiError(body.error || body.message || "Press could not create that export.", response.status);
+  }
+  const blob = await response.blob();
+  const disposition = response.headers.get("content-disposition") || "";
+  const fileName = disposition.match(/filename="([^"]+)"/)?.[1] || "press-recording-export.json";
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 export async function getPressTranscript(projectId: string, signal?: AbortSignal): Promise<PressTranscript | null> {

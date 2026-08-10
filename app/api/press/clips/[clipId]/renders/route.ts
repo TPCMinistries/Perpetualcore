@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPressAdminClient, PRESS_RENDER_BUCKET } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { createRendersSchema } from "@/lib/press/schemas";
-import { asJob, asRender, requireClip } from "@/lib/press/service";
+import { asJob, asRender, assertProjectIsMutable, requireClip, requireProject } from "@/lib/press/service";
 import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
 import { assertPressJobCapacity } from "@/lib/press/limits";
 import { checkPressJobRateLimit } from "@/lib/press/rate-limit";
@@ -11,6 +11,7 @@ import { checkPressJobRateLimit } from "@/lib/press/rate-limit";
 export async function POST(request: NextRequest, { params }: { params: Promise<{ clipId: string }> }) {
   try {
     const clip = await requireClip((await params).clipId, PRESS_EDITOR_ROLES);
+    assertProjectIsMutable(await requireProject(clip.project_id, PRESS_EDITOR_ROLES));
     if (clip.status !== "approved") {
       return NextResponse.json({ error: "Clip must be approved before rendering" }, { status: 409 });
     }

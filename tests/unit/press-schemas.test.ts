@@ -5,6 +5,7 @@ import {
   createProjectSchema,
   createAuthenticClipPackSchema,
   createRendersSchema,
+  deleteProjectSchema,
   reportJobSchema,
   transcriptionResultSchema,
   updateTranscriptSchema,
@@ -16,6 +17,17 @@ describe("Press request schemas", () => {
     expect(() => createProjectSchema.parse({ title: "Town hall" })).toThrow();
     expect(createProjectSchema.parse({ title: "Town hall", rightsAttested: true }))
       .toMatchObject({ title: "Town hall", rightsAttested: true, platforms: [] });
+  });
+
+  it("requires an exact, explicit permanent-delete acknowledgement", () => {
+    expect(deleteProjectSchema.parse({
+      confirmationTitle: "Board interview",
+      acknowledgePermanentDelete: true,
+    }).confirmationTitle).toBe("Board interview");
+    expect(() => deleteProjectSchema.parse({
+      confirmationTitle: "Board interview",
+      acknowledgePermanentDelete: false,
+    })).toThrow();
   });
 
   it("accepts supported media metadata and rejects oversized uploads", () => {
@@ -76,8 +88,16 @@ describe("Press request schemas", () => {
     expect(() => createRendersSchema.parse({ formats: [{ aspectRatio: "4:5" }] })).toThrow();
   });
 
-  it("validates worker leases, failure reports, and transcription results", () => {
+  it("validates worker leases, liveness, failure reports, and transcription results", async () => {
+    const { workerHeartbeatSchema } = await import("@/lib/press/schemas");
     expect(claimJobSchema.parse({ workerId: "press-worker-1" }).leaseSeconds).toBe(300);
+    expect(workerHeartbeatSchema.parse({
+      workerId: "press-worker-1",
+      currentJobId: null,
+      realtimeConnected: true,
+      wakeMode: "realtime+recovery",
+      recoverySweepMs: 300_000,
+    }).wakeMode).toBe("realtime+recovery");
     expect(() => reportJobSchema.parse({ workerId: "press-worker-1", status: "failed" })).toThrow();
     expect(reportJobSchema.parse({
       workerId: "press-worker-1",

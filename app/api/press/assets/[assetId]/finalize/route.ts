@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createPressAdminClient } from "@/lib/press/db";
 import { pressErrorResponse } from "@/lib/press/http";
 import { finalizeAssetSchema } from "@/lib/press/schemas";
-import { asAsset, asJob, requireAsset, requireProject } from "@/lib/press/service";
+import { asAsset, asJob, assertProjectIsMutable, requireAsset, requireProject } from "@/lib/press/service";
 import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
 import { assertPressJobCapacity } from "@/lib/press/limits";
 import { checkPressJobRateLimit } from "@/lib/press/rate-limit";
@@ -13,6 +13,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
     const asset = await requireAsset((await params).assetId, PRESS_EDITOR_ROLES);
     const project = await requireProject(asset.project_id, PRESS_EDITOR_ROLES);
+    assertProjectIsMutable(project);
     if (!project.rights_attested_at || !project.rights_attested_by) {
       return NextResponse.json({ error: "Media rights attestation is required before processing" }, { status: 403 });
     }
@@ -43,7 +44,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     if (actualMime && actualMime !== asset.mime_type) {
       return NextResponse.json({ error: "Uploaded object type does not match intent" }, { status: 409 });
     }
-    await assertPressJobCapacity(admin, asset.organization_id);
+    // A replay after a lost response is already finalized transactionally and
+    // must not fail merely because that first job filled the active-job quota.
+    if (asset.status === "awaiting_upload") {
+      await assertPressJobCapacity(admin, asset.organization_id);
+    }
     const { data: finalized, error: finalizeError } = await admin.rpc("press_finalize_asset_upload", {
       p_asset_id: asset.id,
       p_checksum: input.checksum ?? undefined,

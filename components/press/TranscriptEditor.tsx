@@ -17,7 +17,7 @@ function formatTime(milliseconds: number): string {
     : `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function TranscriptEditor({ transcript, onSeek, onSaved }: { transcript: PressTranscript | null; onSeek: (milliseconds: number) => void; onSaved: (transcript: PressTranscript) => void }) {
+export function TranscriptEditor({ transcript, onSeek, onSaved, readOnly = false }: { transcript: PressTranscript | null; onSeek: (milliseconds: number) => void; onSaved: (transcript: PressTranscript) => void; readOnly?: boolean }) {
   const [draft, setDraft] = useState<PressTranscript | null>(transcript);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -63,12 +63,14 @@ export function TranscriptEditor({ transcript, onSeek, onSaved }: { transcript: 
       <div className="flex flex-col justify-between gap-3 border-b border-zinc-200 p-4 sm:flex-row sm:items-center">
         <div>
           <h3 className="font-medium text-zinc-950">Transcript</h3>
-          <p className="mt-0.5 text-xs text-zinc-500">Edit the words while preserving their source timestamps.</p>
+          <p className="mt-0.5 text-xs text-zinc-500">{readOnly ? "Archived transcripts are preserved as read-only history." : "Edit the words while preserving their source timestamps."}</p>
         </div>
-        <Button type="button" className="h-11 rounded-md bg-zinc-950 text-white hover:bg-zinc-800" onClick={() => void save()} disabled={!dirty || saving}>
-          {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden /> : saved ? <Check className="mr-2 h-4 w-4" aria-hidden /> : <Save className="mr-2 h-4 w-4" aria-hidden />}
-          {saving ? "Saving" : saved ? "Saved" : "Save transcript"}
-        </Button>
+        {!readOnly && (
+          <Button type="button" className="h-11 rounded-md bg-zinc-950 text-white hover:bg-zinc-800" onClick={() => void save()} disabled={!dirty || saving}>
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden /> : saved ? <Check className="mr-2 h-4 w-4" aria-hidden /> : <Save className="mr-2 h-4 w-4" aria-hidden />}
+            {saving ? "Saving" : saved ? "Saved" : "Save transcript"}
+          </Button>
+        )}
       </div>
 
       {draft.segments.length > 0 ? (
@@ -83,6 +85,7 @@ export function TranscriptEditor({ transcript, onSeek, onSaved }: { transcript: 
                 <Textarea
                   aria-label={`Transcript segment at ${formatTime(segment.startMs)}`}
                   value={segment.text}
+                  readOnly={readOnly}
                   rows={Math.max(2, Math.ceil(segment.text.length / 90))}
                   className="min-h-20 resize-y rounded-none border-zinc-200 text-sm leading-6 focus-visible:ring-zinc-950"
                   onChange={(event) => {
@@ -101,6 +104,7 @@ export function TranscriptEditor({ transcript, onSeek, onSaved }: { transcript: 
           <Textarea
             aria-label="Full transcript"
             value={draft.fullText}
+            readOnly={readOnly}
             rows={18}
             className="resize-y rounded-none border-zinc-200 text-sm leading-7 focus-visible:ring-zinc-950"
             onChange={(event) => {

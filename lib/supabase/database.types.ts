@@ -19206,6 +19206,21 @@ export type Database = {
           },
         ]
       }
+      press_worker_wakeups: {
+        Row: {
+          queue_name: string
+          wake_token: string
+        }
+        Insert: {
+          queue_name: string
+          wake_token?: string
+        }
+        Update: {
+          queue_name?: string
+          wake_token?: string
+        }
+        Relationships: []
+      }
       proactive_behaviors: {
         Row: {
           behavior_type: string
@@ -31943,6 +31958,29 @@ export type Database = {
           vec_sim: number
         }[]
       }
+      press_archive_project: {
+        Args: { p_organization_id: string; p_project_id: string }
+        Returns: {
+          brand_id: string | null
+          created_at: string
+          created_by: string
+          id: string
+          metadata: Json
+          organization_id: string
+          platforms: string[]
+          rights_attested_at: string
+          rights_attested_by: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "press_projects"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       press_claim_next_job: {
         Args: {
           p_job_types?: string[]
@@ -32093,6 +32131,42 @@ export type Database = {
           p_segments: Json
         }
         Returns: string
+      }
+      press_retry_job: {
+        Args: {
+          p_job_id: string
+          p_organization_id: string
+          p_requested_by: string
+        }
+        Returns: {
+          asset_id: string | null
+          attempts: number
+          created_at: string
+          error_message: string | null
+          generation_run_id: string | null
+          id: string
+          idempotency_key: string
+          job_type: string
+          lease_expires_at: string | null
+          lease_owner: string | null
+          lease_token: string | null
+          max_attempts: number
+          organization_id: string
+          payload: Json
+          priority: number
+          progress: number
+          project_id: string
+          render_id: string | null
+          result: Json | null
+          status: string
+          updated_at: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "press_jobs"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       press_update_transcript: {
         Args: {

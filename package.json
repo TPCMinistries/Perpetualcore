@@ -125,6 +125,7 @@
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
     "tiktoken": "^1.0.22",
+    "tus-js-client": "4.3.1",
     "twilio": "^5.10.3",
     "zod": "^4.1.12"
   },

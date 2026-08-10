@@ -1,16 +1,28 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { AlertCircle, CheckCircle2, FileVideo2, Loader2, Upload, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import type { Upload as TusUpload } from "tus-js-client";
+import { AlertCircle, CheckCircle2, FileVideo2, Loader2, Pause, RotateCcw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { PRESS_ACCEPTED_MIME_TYPE_SET, PRESS_MAX_FILE_BYTES } from "@/lib/press/media";
-import { createPressProject, createUploadIntent, finalizeAsset, getErrorMessage } from "./api-client";
+import { createPressResumableUpload, startPressResumableUpload } from "@/lib/press/resumable-upload";
+import {
+  createPressProject, createUploadIntent, finalizeAsset, getErrorMessage, refreshUploadToken,
+  type PressUploadIntent,
+} from "./api-client";
 import type { PressProject } from "./types";
+
+type UploadPhase = "idle" | "creating" | "reserving" | "uploading" | "paused" | "finalizing" | "complete" | "error";
+
+interface UploadSession {
+  project: PressProject;
+  intent: PressUploadIntent | null;
+  uploaded: boolean;
+}
 
 function formatBytes(bytes: number): string {
   const units = ["B", "KB", "MB", "GB"];
@@ -29,17 +41,24 @@ function titleFromFile(fileName: string): string {
 
 export function RecordingUploader({ onComplete, processingMessage }: { onComplete: (project: PressProject) => void; processingMessage?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const uploadRef = useRef<TusUpload | null>(null);
+  const sessionRef = useRef<UploadSession | null>(null);
+  const cancellingRef = useRef(false);
   const [file, setFile] = useState<File | null>(null);
   const [dragging, setDragging] = useState(false);
-  const [uploading, setUploading] = useState(false);
+  const [phase, setPhase] = useState<UploadPhase>("idle");
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [rightsAttested, setRightsAttested] = useState(false);
 
   function selectFile(nextFile: File) {
+    if (sessionRef.current) return;
     setError(null);
     setRightsAttested(false);
+    setProgress(0);
+    setStatus("");
+    setPhase("idle");
     if (!PRESS_ACCEPTED_MIME_TYPE_SET.has(nextFile.type)) {
       setFile(null);
       setError("Choose an MP4, MOV, WebM, MP3, M4A, or WAV recording.");
@@ -53,56 +72,126 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
     setFile(nextFile);
   }
 
+  async function finalizeUpload(session: UploadSession) {
+    if (!session.intent) return;
+    session.uploaded = true;
+    setPhase("finalizing");
+    setProgress(98);
+    setStatus("Securing the upload and starting transcription…");
+    try {
+      await finalizeAsset(session.intent.asset.id);
+      setProgress(100);
+      setStatus("Upload complete");
+      setPhase("complete");
+      onComplete({ ...session.project, status: "processing" });
+      uploadRef.current = null;
+      sessionRef.current = null;
+      setFile(null);
+      setRightsAttested(false);
+    } catch (finalizeError) {
+      setPhase("error");
+      setStatus("The file is uploaded, but processing has not started yet.");
+      setError(getErrorMessage(finalizeError));
+    }
+  }
+
+  async function startTransport(session: UploadSession, token: string) {
+    if (!file || !session.intent) return;
+    cancellingRef.current = false;
+    setPhase("uploading");
+    setStatus("Uploading the source recording…");
+    const upload = createPressResumableUpload({
+      assetId: session.intent.asset.id,
+      bucket: session.intent.upload.bucket,
+      path: session.intent.upload.path,
+      token,
+      file,
+      onProgress: (bytesUploaded, bytesTotal) => {
+        const transferred = bytesTotal > 0 ? Math.round((bytesUploaded / bytesTotal) * 95) : 0;
+        setProgress(Math.min(95, Math.max(1, transferred)));
+        setStatus(`Uploading ${formatBytes(bytesUploaded)} of ${formatBytes(bytesTotal)}…`);
+      },
+      onSuccess: () => {
+        void finalizeUpload(session);
+      },
+      onError: (uploadError) => {
+        if (cancellingRef.current) return;
+        setPhase("error");
+        setStatus("Upload paused before completion.");
+        setError(getErrorMessage(uploadError));
+      },
+    });
+    uploadRef.current = upload;
+    await startPressResumableUpload(upload);
+  }
+
   async function upload() {
-    if (!file || uploading) return;
-    if (!rightsAttested) {
+    const busy = ["creating", "reserving", "uploading", "finalizing"].includes(phase);
+    if (!file || busy) return;
+    if (!rightsAttested && !sessionRef.current) {
       setError("Confirm that you have the rights and consent required to process this recording.");
       return;
     }
-    setUploading(true);
     setError(null);
 
-    let createdProject: PressProject | null = null;
     try {
-      setProgress(10);
-      setStatus("Creating the production record…");
-      const project = await createPressProject(titleFromFile(file.name), rightsAttested);
-      createdProject = project;
-
-      setProgress(25);
-      setStatus("Preparing a secure upload…");
-      const intent = await createUploadIntent(project.id, file);
-
-      setProgress(45);
-      setStatus("Uploading the source recording…");
-      const supabase = createClient();
-      const { error: uploadError } = await supabase.storage
-        .from(intent.upload.bucket)
-        .uploadToSignedUrl(intent.upload.path, intent.upload.token, file, {
-          contentType: file.type,
-        });
-      if (uploadError) throw uploadError;
-
-      setProgress(85);
-      setStatus("Starting transcription…");
-      await finalizeAsset(intent.asset.id);
-
-      setProgress(100);
-      setStatus("Upload complete");
-      onComplete({ ...project, status: "processing" });
-      setFile(null);
-      setRightsAttested(false);
-    } catch (uploadError) {
-      if (createdProject) {
-        onComplete(createdProject);
+      let session = sessionRef.current;
+      if (!session) {
+        setPhase("creating");
+        setProgress(2);
+        setStatus("Creating the production record…");
+        const project = await createPressProject(titleFromFile(file.name), rightsAttested);
+        session = { project, intent: null, uploaded: false };
+        sessionRef.current = session;
+        onComplete(project);
       }
-      setProgress(0);
-      setStatus("");
+
+      if (!session.intent) {
+        setPhase("reserving");
+        setProgress(4);
+        setStatus("Preparing a secure resumable upload…");
+        session.intent = await createUploadIntent(session.project.id, file);
+        onComplete({ ...session.project, status: "uploading" });
+        await startTransport(session, session.intent.upload.token);
+        return;
+      }
+
+      if (session.uploaded) {
+        await finalizeUpload(session);
+        return;
+      }
+
+      setPhase("reserving");
+      setStatus("Refreshing the secure upload…");
+      const refreshed = await refreshUploadToken(session.intent.asset.id);
+      session.intent.upload = refreshed.upload;
+      await startTransport(session, refreshed.upload.token);
+    } catch (uploadError) {
+      setPhase("error");
+      setStatus(sessionRef.current ? "Upload paused before completion." : "The upload could not be started.");
       setError(getErrorMessage(uploadError));
-    } finally {
-      setUploading(false);
     }
   }
+
+  async function pauseUpload() {
+    if (phase !== "uploading" || !uploadRef.current) return;
+    cancellingRef.current = true;
+    await uploadRef.current.abort(false);
+    setPhase("paused");
+    setStatus("Upload paused. Continue when you are ready.");
+    setError(null);
+  }
+
+  const busy = ["creating", "reserving", "uploading", "finalizing"].includes(phase);
+  const selectionLocked = busy || Boolean(sessionRef.current);
+  const canRetry = (phase === "paused" || phase === "error") && Boolean(sessionRef.current);
+  const actionLabel = canRetry
+    ? (sessionRef.current?.uploaded ? "Start processing" : "Resume upload")
+    : phase === "finalizing"
+      ? "Starting processing"
+      : busy
+        ? "Uploading"
+        : "Start upload";
 
   return (
     <section id="new-recording" aria-labelledby="press-upload-title" className="scroll-mt-28 border border-black/10 bg-white p-5 sm:p-7 lg:p-8">
@@ -125,11 +214,11 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
         className={cn(
           "mt-6 rounded-md border border-dashed p-6 text-center transition-colors sm:p-8",
           dragging ? "border-[#1648d8] bg-[#edf2ff]" : "border-black/20 bg-[#f6f1e8]",
-          !uploading && "cursor-pointer hover:border-[#1648d8] hover:bg-[#f1f5ff]"
+          !selectionLocked && "cursor-pointer hover:border-[#1648d8] hover:bg-[#f1f5ff]"
         )}
         onDragEnter={(event) => {
           event.preventDefault();
-          if (!uploading) setDragging(true);
+          if (!selectionLocked) setDragging(true);
         }}
         onDragOver={(event) => event.preventDefault()}
         onDragLeave={() => setDragging(false)}
@@ -137,15 +226,15 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
           event.preventDefault();
           setDragging(false);
           const dropped = event.dataTransfer.files[0];
-          if (dropped && !uploading) selectFile(dropped);
+          if (dropped && !selectionLocked) selectFile(dropped);
         }}
-        onClick={() => !uploading && inputRef.current?.click()}
+        onClick={() => !selectionLocked && inputRef.current?.click()}
         onKeyDown={(event) => {
-          if ((event.key === "Enter" || event.key === " ") && !uploading) inputRef.current?.click();
+          if ((event.key === "Enter" || event.key === " ") && !selectionLocked) inputRef.current?.click();
         }}
         role="button"
-        tabIndex={uploading ? -1 : 0}
-        aria-disabled={uploading}
+        tabIndex={selectionLocked ? -1 : 0}
+        aria-disabled={selectionLocked}
         aria-label="Choose a source recording to upload"
       >
         <input
@@ -154,7 +243,7 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
           className="sr-only"
           tabIndex={-1}
           accept="video/mp4,video/quicktime,video/webm,audio/mpeg,audio/mp4,audio/wav,audio/x-m4a,.mp4,.mov,.webm,.mp3,.m4a,.wav"
-          disabled={uploading}
+          disabled={selectionLocked}
           onChange={(event) => {
             const selected = event.target.files?.[0];
             if (selected) selectFile(selected);
@@ -185,20 +274,25 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!uploading && (
+            {!selectionLocked && (
               <Button type="button" variant="ghost" size="icon" className="h-11 w-11" onClick={() => { setFile(null); setRightsAttested(false); }} aria-label="Remove selected recording">
                 <X className="h-4 w-4" aria-hidden />
               </Button>
             )}
-            <Button type="button" className="h-11 rounded-full bg-[#1648d8] px-5 text-white hover:bg-[#1039ad]" onClick={upload} disabled={uploading || !rightsAttested}>
-              {uploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden /> : <Upload className="mr-2 h-4 w-4" aria-hidden />}
-              {uploading ? "Uploading" : "Start upload"}
+            {phase === "uploading" && (
+              <Button type="button" variant="outline" className="h-11 bg-white" onClick={() => void pauseUpload()}>
+                <Pause className="mr-2 h-4 w-4" aria-hidden /> Pause
+              </Button>
+            )}
+            <Button type="button" className="h-11 rounded-full bg-[#1648d8] px-5 text-white hover:bg-[#1039ad]" onClick={() => void upload()} disabled={busy || (!rightsAttested && !sessionRef.current)}>
+              {busy ? <Loader2 className="mr-2 h-4 w-4 animate-spin motion-reduce:animate-none" aria-hidden /> : canRetry ? <RotateCcw className="mr-2 h-4 w-4" aria-hidden /> : <Upload className="mr-2 h-4 w-4" aria-hidden />}
+              {actionLabel}
             </Button>
           </div>
         </div>
       )}
 
-      {file && !uploading && (
+      {file && phase === "idle" && (
         <div className="mt-4 flex items-start gap-3 border border-zinc-300 bg-white p-4">
           <Checkbox
             id="press-rights-attestation"
@@ -220,7 +314,7 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
         </div>
       )}
 
-      {uploading && (
+      {file && phase !== "idle" && phase !== "complete" && (
         <div className="mt-4" role="status" aria-live="polite">
           <div className="mb-2 flex items-center justify-between gap-4 text-xs text-zinc-600">
             <span>{status}</span>
@@ -230,7 +324,7 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
         </div>
       )}
 
-      {!uploading && progress === 100 && (
+      {phase === "complete" && progress === 100 && (
         <p className="mt-4 flex items-center gap-2 text-sm text-emerald-700" role="status">
           <CheckCircle2 className="h-4 w-4" aria-hidden /> Upload complete. Transcription has started.
         </p>

@@ -15,6 +15,14 @@ const heartbeatSql = readFileSync(
   resolve(process.cwd(), "supabase/migrations/20260715_press_worker_heartbeat.sql"),
   "utf8",
 );
+const wakeupSql = readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20260810025826_press_worker_event_wakeup.sql"),
+  "utf8",
+);
+const lifecycleSql = readFileSync(
+  resolve(process.cwd(), "supabase/migrations/20260810030208_press_lifecycle_controls.sql"),
+  "utf8",
+);
 const generationSql = readFileSync(
   resolve(process.cwd(), "supabase/migrations/20260715_press_generation_studio.sql"),
   "utf8",
@@ -123,6 +131,29 @@ describe("Press foundation migration security contract", () => {
     expect(heartbeatSql).toContain("REVOKE ALL ON public.press_worker_heartbeats FROM PUBLIC, anon, authenticated");
     expect(heartbeatSql).toContain("GRANT SELECT, INSERT, UPDATE, DELETE ON public.press_worker_heartbeats TO service_role");
     expect(heartbeatSql).not.toMatch(/CREATE POLICY/);
+  });
+
+  it("publishes only a non-sensitive, read-only worker wake latch", () => {
+    expect(wakeupSql).toContain("ALTER TABLE public.press_worker_wakeups ENABLE ROW LEVEL SECURITY");
+    expect(wakeupSql).toContain("GRANT SELECT ON public.press_worker_wakeups TO anon");
+    expect(wakeupSql).not.toMatch(/GRANT (INSERT|UPDATE|DELETE).* TO anon/);
+    expect(wakeupSql).toContain("SECURITY INVOKER");
+    expect(wakeupSql).toContain("SET search_path = ''");
+    expect(wakeupSql).toContain("ALTER PUBLICATION supabase_realtime ADD TABLE public.press_worker_wakeups");
+    expect(wakeupSql).not.toMatch(/ALTER PUBLICATION supabase_realtime ADD TABLE public\.press_jobs/);
+  });
+
+  it("makes archive terminal and coordinates destructive lifecycle work through the server", () => {
+    expect(lifecycleSql).toContain("DROP POLICY IF EXISTS press_projects_delete");
+    expect(lifecycleSql).toContain("REVOKE DELETE ON public.press_projects");
+    expect(lifecycleSql).toContain("CREATE OR REPLACE FUNCTION public.press_archive_project");
+    expect(lifecycleSql).toContain("p.status <> 'archived'");
+    expect(lifecycleSql).toContain("CREATE OR REPLACE FUNCTION public.press_retry_job");
+    expect(lifecycleSql).toContain("SECURITY INVOKER");
+    expect(lifecycleSql).toContain("SET search_path = ''");
+    expect(lifecycleSql).toContain("GRANT EXECUTE ON FUNCTION public.press_archive_project(uuid, uuid) TO service_role");
+    expect(lifecycleSql).toContain("GRANT EXECUTE ON FUNCTION public.press_retry_job(uuid, uuid, uuid) TO service_role");
+    expect(lifecycleSql).not.toMatch(/GRANT EXECUTE ON FUNCTION public\.press_(archive_project|retry_job)[^\n]+authenticated/);
   });
 
   it("queues clip-pack generation atomically and keeps mutations service-role only", () => {
