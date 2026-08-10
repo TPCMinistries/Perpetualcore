@@ -24,6 +24,10 @@ const nextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '10mb',
+      // The Press domain router (press.perpetualcore.com) rewrites product
+      // routes to this app cross-origin; without this, server action POSTs
+      // (e.g. the Google sign-in button on /login) are rejected with a 500.
+      allowedOrigins: ['press.perpetualcore.com'],
     },
     serverSourceMaps: false,
     // Enable optimized package imports for better tree-shaking
