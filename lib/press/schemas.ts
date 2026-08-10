@@ -33,6 +33,11 @@ export const finalizeAssetSchema = z.object({
   durationSeconds: z.number().positive().max(24 * 60 * 60).optional(),
 }).strict();
 
+export const deleteProjectSchema = z.object({
+  confirmationTitle: z.string().trim().min(1).max(200),
+  acknowledgePermanentDelete: z.literal(true),
+}).strict();
+
 export const transcriptSegmentSchema = z.object({
   id: uuidSchema.optional(),
   startMs: z.number().int().nonnegative(),
@@ -99,6 +104,14 @@ export const claimJobSchema = z.object({
   workerId: z.string().trim().min(3).max(120),
   jobTypes: z.array(z.string().trim().min(1).max(80)).min(1).max(20).optional(),
   leaseSeconds: z.number().int().min(30).max(900).default(300),
+}).strict();
+
+export const workerHeartbeatSchema = z.object({
+  workerId: z.string().trim().min(3).max(120),
+  currentJobId: uuidSchema.nullable().default(null),
+  realtimeConnected: z.boolean(),
+  wakeMode: z.enum(["realtime+recovery", "recovery"]),
+  recoverySweepMs: z.number().int().min(60_000).max(24 * 60 * 60 * 1000),
 }).strict();
 
 export const reportJobSchema = z.object({

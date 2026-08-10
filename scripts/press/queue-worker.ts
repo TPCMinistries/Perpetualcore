@@ -4,7 +4,7 @@
  * Press queue consumer for probing, transcription, clip scoring, and rendering.
  * The API leases one job at a time and supplies only short-lived, job-scoped
  * source and output URLs. Progress and validated results return through the
- * worker report endpoint; this process never receives Supabase credentials.
+ * worker report endpoint; this process never receives a Supabase secret key.
  */
 
 import { createHash } from "node:crypto";
@@ -16,6 +16,8 @@ import { Readable, Transform } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { spawn } from "node:child_process";
 import { createCanvas } from "canvas";
+import { createClient, type RealtimeChannel, type SupabaseClient } from "@supabase/supabase-js";
+import { createPressDrainScheduler } from "./worker-scheduler";
 
 type SupportedJobType = "probe_media" | "transcribe_media" | "score_clips" | "render_clip";
 
@@ -72,10 +74,13 @@ interface WhisperJson {
 const apiBase = (process.env.PRESS_API_BASE_URL ?? "http://localhost:3000").replace(/\/$/, "");
 const workerSecret = process.env.PRESS_WORKER_SECRET ?? "";
 const workerId = process.env.PRESS_WORKER_ID ?? `press-local-${process.pid}`;
-const pollMs = Number(process.env.PRESS_WORKER_POLL_MS ?? "60000");
+const recoverySweepMs = Number(process.env.PRESS_WORKER_RECOVERY_SWEEP_MS ?? String(5 * 60_000));
+const workerHeartbeatMs = Number(process.env.PRESS_WORKER_HEARTBEAT_MS ?? "60000");
 const processTimeoutMs = Number(process.env.PRESS_WORKER_PROCESS_TIMEOUT_MS ?? String(30 * 60_000));
 const maxDownloadBytes = Number(process.env.PRESS_WORKER_MAX_DOWNLOAD_BYTES ?? String(512 * 1024 * 1024));
 const once = process.argv.includes("--once");
+let currentJobId: string | null = null;
+let realtimeConnected = false;
 
 function run(command: string, args: string[], cwd?: string): Promise<string> {
   return new Promise((resolvePromise, reject) => {
@@ -539,7 +544,12 @@ async function tick(): Promise<boolean> {
     jobTypes: ["probe_media", "transcribe_media", "score_clips", "render_clip"],
     leaseSeconds: 900,
   });
-  if (!response.job) return false;
+  if (!response.job) {
+    currentJobId = null;
+    return false;
+  }
+
+  currentJobId = response.job.id;
 
   let lastProgress = 5;
   const heartbeat = setInterval(() => {
@@ -565,24 +575,108 @@ async function tick(): Promise<boolean> {
     });
   } finally {
     clearInterval(heartbeat);
+    currentJobId = null;
   }
   return true;
 }
 
+async function drainQueue(): Promise<void> {
+  while (await tick()) {
+    // Claim immediately after every completed job so one wake drains the queue.
+  }
+}
+
+async function reportWorkerHeartbeat(wakeMode: "realtime+recovery" | "recovery"): Promise<void> {
+  await api("/api/press/worker/heartbeat", {
+    workerId,
+    currentJobId,
+    realtimeConnected,
+    wakeMode,
+    recoverySweepMs,
+  });
+}
+
 async function main(): Promise<void> {
   if (!workerSecret) throw new Error("PRESS_WORKER_SECRET is required");
-  if (!Number.isFinite(pollMs) || pollMs < 1000) throw new Error("PRESS_WORKER_POLL_MS must be >= 1000");
+  if (!Number.isFinite(recoverySweepMs) || recoverySweepMs < 60_000) {
+    throw new Error("PRESS_WORKER_RECOVERY_SWEEP_MS must be >= 60000");
+  }
+  if (!Number.isFinite(workerHeartbeatMs) || workerHeartbeatMs < 30_000) {
+    throw new Error("PRESS_WORKER_HEARTBEAT_MS must be >= 30000");
+  }
   if (!Number.isFinite(processTimeoutMs) || processTimeoutMs < 60_000) {
     throw new Error("PRESS_WORKER_PROCESS_TIMEOUT_MS must be >= 60000");
   }
   if (!Number.isFinite(maxDownloadBytes) || maxDownloadBytes < 1024 * 1024) {
     throw new Error("PRESS_WORKER_MAX_DOWNLOAD_BYTES must be >= 1048576");
   }
-  do {
-    const worked = await tick();
-    if (once) return;
-    if (!worked) await new Promise((resolvePromise) => setTimeout(resolvePromise, pollMs));
-  } while (true);
+  if (once) {
+    await tick();
+    return;
+  }
+
+  let stopping = false;
+  let realtime: SupabaseClient | null = null;
+  let wakeChannel: RealtimeChannel | null = null;
+  let wakeMode: "realtime+recovery" | "recovery" = "recovery";
+
+  const scheduler = createPressDrainScheduler({
+    drain: async (reason) => {
+      process.stdout.write(`Press queue drain requested (${reason}).\n`);
+      await drainQueue();
+    },
+    onError: (error) => {
+      process.stderr.write(`Press queue drain failed: ${error instanceof Error ? error.message : String(error)}\n`);
+    },
+  });
+
+  try {
+    const config = await api<{ url: string; publishableKey: string }>("/api/press/worker/wakeup-config", {});
+    realtime = createClient(config.url, config.publishableKey, {
+      auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+    });
+    wakeMode = "realtime+recovery";
+    wakeChannel = realtime
+      .channel("press-worker-wakeup")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "press_worker_wakeups", filter: "queue_name=eq.media" },
+        () => { void scheduler.request("realtime"); },
+      )
+      .subscribe((status, error) => {
+        realtimeConnected = status === "SUBSCRIBED";
+        if (status === "SUBSCRIBED") {
+          void scheduler.request("realtime-connected");
+        } else if ((status === "CHANNEL_ERROR" || status === "TIMED_OUT") && !stopping) {
+          process.stderr.write(`Press Realtime ${status.toLowerCase()}: ${error?.message ?? "retrying"}\n`);
+        }
+      });
+  } catch (error) {
+    process.stderr.write(`Press Realtime unavailable; using recovery sweeps: ${error instanceof Error ? error.message : String(error)}\n`);
+  }
+
+  const sendHeartbeat = () => {
+    void reportWorkerHeartbeat(wakeMode).catch((error: unknown) => {
+      process.stderr.write(`Press worker liveness heartbeat failed: ${error instanceof Error ? error.message : String(error)}\n`);
+    });
+  };
+  sendHeartbeat();
+  const heartbeatTimer = setInterval(sendHeartbeat, workerHeartbeatMs);
+  const recoveryTimer = setInterval(() => { void scheduler.request("recovery-sweep"); }, recoverySweepMs);
+
+  await scheduler.request("startup");
+  await new Promise<void>((resolvePromise) => {
+    const stop = () => resolvePromise();
+    process.once("SIGINT", stop);
+    process.once("SIGTERM", stop);
+  });
+
+  stopping = true;
+  scheduler.stop();
+  clearInterval(heartbeatTimer);
+  clearInterval(recoveryTimer);
+  realtimeConnected = false;
+  if (realtime && wakeChannel) await realtime.removeChannel(wakeChannel);
 }
 
 main().catch((error: unknown) => {

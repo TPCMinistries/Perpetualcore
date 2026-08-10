@@ -212,6 +212,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     ) {
       return NextResponse.json({ error: "Worker does not own this job lease" }, { status: 409 });
     }
+    const { data: projectState, error: projectError } = await admin.from("press_projects")
+      .select("status")
+      .eq("id", job.project_id)
+      .eq("organization_id", job.organization_id)
+      .maybeSingle();
+    if (projectError) throw projectError;
+    if (!projectState) throw new PressHttpError(404, "Press project not found");
+    if (projectState.status === "archived") {
+      return NextResponse.json({ error: "Archived projects do not accept worker results" }, { status: 409 });
+    }
     const { error: heartbeatError } = await admin.from("press_worker_heartbeats").upsert({
       worker_id: input.workerId,
       last_seen_at: heartbeatAt,

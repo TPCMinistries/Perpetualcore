@@ -34,6 +34,11 @@ export interface PressProject {
   renders?: PressRender[];
   errorMessage?: string | null;
   latestJob?: PressJobSummary | null;
+  jobs?: PressJobSummary[];
+  permissions?: {
+    canEdit: boolean;
+    canManageLifecycle: boolean;
+  };
 }
 
 export interface PressJobSummary {
@@ -44,6 +49,7 @@ export interface PressJobSummary {
   attempts: number;
   maxAttempts: number;
   errorMessage?: string | null;
+  retryable?: boolean;
   createdAt: string;
   updatedAt: string;
 }

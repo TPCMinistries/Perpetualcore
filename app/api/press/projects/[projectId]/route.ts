@@ -5,12 +5,15 @@ import { createPressAdminClient } from "@/lib/press/db";
 import { asProject, requireProject } from "@/lib/press/service";
 import { rows } from "@/lib/press/service";
 import type { PressAsset, PressJob, PressRender } from "@/lib/press/types";
-import { PRESS_EDITOR_ROLES, requirePressUser } from "@/lib/press/auth";
+import {
+  PRESS_ADMIN_ROLES, PRESS_EDITOR_ROLES, requireOrganizationAccess, requirePressUser,
+} from "@/lib/press/auth";
 import { checkPressMutationRateLimit } from "@/lib/press/rate-limit";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ projectId: string }> }) {
   try {
     const project = await requireProject((await params).projectId);
+    const { role } = await requireOrganizationAccess(project.organization_id);
     const admin = createPressAdminClient();
     const [assetsResult, jobsResult, rendersResult, clipCountResult] = await Promise.all([
       admin.from("press_assets").select("*").eq("project_id", project.id).order("created_at", { ascending: false }),
@@ -40,11 +43,20 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       attempts: job.attempts,
       maxAttempts: job.max_attempts,
       errorMessage: customerJobError(job.error_message),
+      retryable: ["failed", "dead"].includes(job.status),
       createdAt: job.created_at,
       updatedAt: job.updated_at,
     }));
     return NextResponse.json({
-      project: { ...project, assets, renders },
+      project: {
+        ...project,
+        assets,
+        renders,
+        permissions: {
+          canEdit: (PRESS_EDITOR_ROLES as readonly string[]).includes(role),
+          canManageLifecycle: (PRESS_ADMIN_ROLES as readonly string[]).includes(role),
+        },
+      },
       assets,
       jobs,
       renders,
@@ -78,12 +90,36 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     if (rateLimited) return rateLimited;
     const updates: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (input.title !== undefined) updates.title = input.title;
-    if (input.status !== undefined) updates.status = input.status;
     if (input.platforms !== undefined) updates.platforms = input.platforms;
     const admin = createPressAdminClient();
-    const { data, error } = await admin.from("press_projects").update(updates)
-      .eq("id", project.id).eq("organization_id", project.organization_id).select("*").single();
-    if (error) throw error;
-    return NextResponse.json({ project: asProject(data) });
+    let updatedProject = project;
+    if (Object.keys(updates).length > 1) {
+      const { data, error } = await admin.from("press_projects").update(updates)
+        .eq("id", project.id).eq("organization_id", project.organization_id).select("*").single();
+      if (error) throw error;
+      updatedProject = asProject(data);
+    }
+    if (input.status === "archived") {
+      await requireOrganizationAccess(project.organization_id, PRESS_ADMIN_ROLES);
+      const { count, error: activeError } = await admin.from("press_jobs")
+        .select("id", { count: "exact", head: true })
+        .eq("project_id", project.id)
+        .eq("organization_id", project.organization_id)
+        .eq("status", "processing")
+        .gt("lease_expires_at", new Date().toISOString());
+      if (activeError) throw activeError;
+      if ((count ?? 0) > 0) {
+        return NextResponse.json({
+          error: "This recording is currently processing. Wait for the active step to finish, then archive it.",
+        }, { status: 409 });
+      }
+      const { data, error } = await admin.rpc("press_archive_project", {
+        p_project_id: project.id,
+        p_organization_id: project.organization_id,
+      });
+      if (error) throw error;
+      updatedProject = asProject(data);
+    }
+    return NextResponse.json({ project: updatedProject });
   } catch (error) { return pressErrorResponse(error); }
 }

@@ -24,11 +24,12 @@ function scoreLabel(score?: number | null): string | null {
 
 const RATIOS: PressRender["aspectRatio"][] = ["9:16", "1:1", "16:9"];
 
-export function ClipCandidates({ clips, onChange, onRenders, onPreview }: {
+export function ClipCandidates({ clips, onChange, onRenders, onPreview, readOnly = false }: {
   clips: PressClip[];
   onChange: (clip: PressClip) => void;
   onRenders: (renders: PressRender[]) => void;
   onPreview: (clip: PressClip) => void;
+  readOnly?: boolean;
 }) {
   const [selected, setSelected] = useState<PressClip | null>(null);
   const [dialog, setDialog] = useState<"edit" | "reject" | "render" | null>(null);
@@ -127,6 +128,11 @@ export function ClipCandidates({ clips, onChange, onRenders, onPreview }: {
 
   return (
     <div>
+      {readOnly && (
+        <div className="mb-4 border border-zinc-300 bg-[#f6f1e8] p-4 text-sm text-zinc-700" role="status">
+          This recording is archived. You can preview its approved history, but editing, review, and rendering are turned off.
+        </div>
+      )}
       {error && (
         <div className="mb-4 flex items-start gap-2 border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> {error}
@@ -155,12 +161,12 @@ export function ClipCandidates({ clips, onChange, onRenders, onPreview }: {
                 <Button type="button" variant="outline" className="h-11 rounded-md" disabled={working} onClick={() => onPreview(clip)}>
                   <Play className="mr-2 h-4 w-4" aria-hidden /> Preview moment
                 </Button>
-                {(clip.status === "candidate" || clip.status === "approved") && (
+                {!readOnly && (clip.status === "candidate" || clip.status === "approved") && (
                   <Button type="button" variant="outline" className="h-11 rounded-md" disabled={working} onClick={() => openEdit(clip)}>
                     <Pencil className="mr-2 h-4 w-4" aria-hidden /> Edit clip
                   </Button>
                 )}
-                {clip.status === "candidate" && (
+                {!readOnly && clip.status === "candidate" && (
                   <>
                     <Button type="button" variant="outline" className="h-11 rounded-md" disabled={working} onClick={() => { setSelected(clip); setDialog("reject"); setError(null); }}><X className="mr-2 h-4 w-4" aria-hidden /> Reject</Button>
                     <Button type="button" className="h-11 rounded-md bg-zinc-950 text-white hover:bg-zinc-800" disabled={working} onClick={() => void review(clip, "approve")}>
@@ -168,7 +174,7 @@ export function ClipCandidates({ clips, onChange, onRenders, onPreview }: {
                     </Button>
                   </>
                 )}
-                {clip.status === "approved" && (
+                {!readOnly && clip.status === "approved" && (
                   <Button type="button" className="h-11 rounded-md bg-zinc-950 text-white hover:bg-zinc-800" onClick={() => { setSelected(clip); setDialog("render"); setError(null); }}><Film className="mr-2 h-4 w-4" aria-hidden /> Render variants</Button>
                 )}
                 {(clip.status === "rendering" || clip.status === "ready") && <p className="flex min-h-11 items-center text-sm text-zinc-600">{clip.status === "rendering" ? "Render is in progress." : "Output is ready in Exports."}</p>}

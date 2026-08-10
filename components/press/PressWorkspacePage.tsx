@@ -13,6 +13,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ClipCandidates } from "./ClipCandidates";
 import { ExportsPanel } from "./ExportsPanel";
 import { GenerationStudio } from "./GenerationStudio";
+import { PressJobMonitor } from "./PressJobMonitor";
+import { PressLifecyclePanel } from "./PressLifecyclePanel";
 import { PublishPerformancePanel } from "./PublishPerformancePanel";
 import { getErrorMessage, getPressProject, getPressTranscript, listPressClips, listPressRenders, updatePressProject } from "./api-client";
 import { PressStatusBadge } from "./PressStatusBadge";
@@ -39,8 +41,10 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
     setArchiving(true);
     setError(null);
     try {
-      await updatePressProject(projectId, { status: "archived" });
-      router.push("/press/studio");
+      const archivedProject = await updatePressProject(projectId, { status: "archived" });
+      setProject((current) => current ? { ...current, ...archivedProject, assets: current.assets, renders: current.renders, jobs: current.jobs, permissions: current.permissions } : archivedProject);
+      setActiveTab("source");
+      setArchiveOpen(false);
       router.refresh();
     } catch (archiveError) {
       setError(getErrorMessage(archiveError));
@@ -134,7 +138,7 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
             <Button type="button" variant="outline" className="h-11 rounded-md bg-white" onClick={() => void load(undefined, true)} disabled={refreshing}>
               <RefreshCw className={`mr-2 h-4 w-4 ${refreshing ? "animate-spin motion-reduce:animate-none" : ""}`} aria-hidden /> Refresh status
             </Button>
-            {project.status !== "archived" && (
+            {project.status !== "archived" && project.permissions?.canManageLifecycle && (
               <Button type="button" variant="outline" className="h-11 rounded-md bg-white text-zinc-700" onClick={() => setArchiveOpen(true)}>
                 <Archive className="mr-2 h-4 w-4" aria-hidden /> Archive
               </Button>
@@ -142,6 +146,7 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
           </div>
         </div>
         {project.status === "failed" && project.errorMessage && <div className="mt-5 flex items-start gap-2 border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert"><AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{project.errorMessage}</div>}
+        {project.status === "archived" && <div className="mt-5 border border-zinc-300 bg-white p-3 text-sm text-zinc-700" role="status">Archived recordings are read-only. You can preview, download, export, or permanently delete this record.</div>}
       </header>
 
       {(panelWarning || project.latestJob?.errorMessage) && (
@@ -161,10 +166,10 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
           <TabsList className="h-12 min-w-max justify-start rounded-none border border-zinc-300 bg-white p-1">
             <TabsTrigger value="source" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Video className="mr-2 h-4 w-4" aria-hidden />Source</TabsTrigger>
             <TabsTrigger value="transcript" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><FileText className="mr-2 h-4 w-4" aria-hidden />Transcript</TabsTrigger>
-            <TabsTrigger value="generate" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Sparkles className="mr-2 h-4 w-4" aria-hidden />Make a pack</TabsTrigger>
+            {project.status !== "archived" && <TabsTrigger value="generate" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Sparkles className="mr-2 h-4 w-4" aria-hidden />Make a pack</TabsTrigger>}
             <TabsTrigger value="clips" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Scissors className="mr-2 h-4 w-4" aria-hidden />Review {clips.length > 0 && <span className="ml-2 opacity-70">{clips.length}</span>}</TabsTrigger>
             <TabsTrigger value="exports" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Film className="mr-2 h-4 w-4" aria-hidden />Downloads {renders.length > 0 && <span className="ml-2 opacity-70">{renders.length}</span>}</TabsTrigger>
-            <TabsTrigger value="publish" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Send className="mr-2 h-4 w-4" aria-hidden />Share</TabsTrigger>
+            {project.status !== "archived" && <TabsTrigger value="publish" className="min-h-10 rounded-sm px-4 data-[state=active]:bg-[#1648d8] data-[state=active]:text-white"><Send className="mr-2 h-4 w-4" aria-hidden />Share</TabsTrigger>}
           </TabsList>
         </div>
 
@@ -186,7 +191,7 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
         <TabsContent value="transcript" className="mt-6 focus-visible:ring-zinc-950">
           <div className="grid gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)] xl:items-start">
             <div className="xl:sticky xl:top-24"><SourcePlayer asset={asset} playbackAsset={proxyAsset} posterAsset={posterAsset} seekToMs={seekToMs} /></div>
-            <TranscriptEditor transcript={transcript} onSeek={(milliseconds) => setSeekToMs(milliseconds)} onSaved={setTranscript} />
+            <TranscriptEditor transcript={transcript} onSeek={(milliseconds) => setSeekToMs(milliseconds)} onSaved={setTranscript} readOnly={project.status === "archived"} />
           </div>
         </TabsContent>
 
@@ -208,6 +213,7 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
             </div>
             <ClipCandidates
               clips={clips}
+              readOnly={project.status === "archived"}
               onPreview={(clip) => setSeekToMs(clip.startMs)}
               onChange={(updated) => setClips((current) => current.map((clip) => clip.id === updated.id ? updated : clip))}
               onRenders={(created) => setRenders((current) => [...created, ...current.filter((item) => !created.some((next) => next.id === item.id))])}
@@ -227,6 +233,17 @@ export function PressWorkspacePage({ projectId }: { projectId: string }) {
           <PublishPerformancePanel projectId={project.id} renders={renders} />
         </TabsContent>
       </Tabs>
+
+      <PressJobMonitor
+        jobs={project.jobs || []}
+        canRetry={project.status !== "archived" && project.permissions?.canManageLifecycle === true}
+        onRefresh={() => load(undefined, true)}
+      />
+      <PressLifecyclePanel
+        project={project}
+        onArchive={() => setArchiveOpen(true)}
+        onDeleted={() => { router.push("/press/studio"); router.refresh(); }}
+      />
 
       <AlertDialog open={archiveOpen} onOpenChange={setArchiveOpen}>
         <AlertDialogContent>
