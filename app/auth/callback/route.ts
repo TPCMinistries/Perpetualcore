@@ -39,6 +39,16 @@ export async function GET(request: NextRequest) {
   const errorDescription = searchParams.get("error_description");
 
   const redirectTo = request.nextUrl.clone();
+  // The Press domain router proxies /auth/* here cross-origin. Session
+  // cookies are set on the press domain, so post-auth redirects must stay
+  // there; only the known press domain is honored from this header.
+  const pressOrigin = request.headers.get("x-press-app-origin");
+  if (pressOrigin === "https://press.perpetualcore.com") {
+    const pressUrl = new URL(pressOrigin);
+    redirectTo.protocol = pressUrl.protocol;
+    redirectTo.host = pressUrl.host;
+    redirectTo.port = "";
+  }
 
   // Handle errors from auth provider
   if (error) {
