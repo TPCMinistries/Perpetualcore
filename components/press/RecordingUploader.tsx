@@ -9,7 +9,13 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { PRESS_ACCEPTED_MIME_TYPE_SET, PRESS_MAX_FILE_BYTES } from "@/lib/press/media";
-import { createPressResumableUpload, startPressResumableUpload } from "@/lib/press/resumable-upload";
+import {
+  createPressResumableUpload,
+  isTusTransportUnavailable,
+  startPressDirectUpload,
+  startPressResumableUpload,
+  type PressDirectUploadHandle,
+} from "@/lib/press/resumable-upload";
 import {
   createPressProject, createUploadIntent, finalizeAsset, getErrorMessage, refreshUploadToken,
   type PressUploadIntent,
@@ -42,6 +48,7 @@ function titleFromFile(fileName: string): string {
 export function RecordingUploader({ onComplete, processingMessage }: { onComplete: (project: PressProject) => void; processingMessage?: string }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadRef = useRef<TusUpload | null>(null);
+  const directUploadRef = useRef<PressDirectUploadHandle | null>(null);
   const sessionRef = useRef<UploadSession | null>(null);
   const cancellingRef = useRef(false);
   const [file, setFile] = useState<File | null>(null);
@@ -100,13 +107,13 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
     cancellingRef.current = false;
     setPhase("uploading");
     setStatus("Uploading the source recording…");
-    const upload = createPressResumableUpload({
+    const transportInput = {
       assetId: session.intent.asset.id,
       bucket: session.intent.upload.bucket,
       path: session.intent.upload.path,
       token,
       file,
-      onProgress: (bytesUploaded, bytesTotal) => {
+      onProgress: (bytesUploaded: number, bytesTotal: number) => {
         const transferred = bytesTotal > 0 ? Math.round((bytesUploaded / bytesTotal) * 95) : 0;
         setProgress(Math.min(95, Math.max(1, transferred)));
         setStatus(`Uploading ${formatBytes(bytesUploaded)} of ${formatBytes(bytesTotal)}…`);
@@ -114,11 +121,33 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
       onSuccess: () => {
         void finalizeUpload(session);
       },
-      onError: (uploadError) => {
+      onError: (uploadError: Error) => {
         if (cancellingRef.current) return;
         setPhase("error");
         setStatus("Upload paused before completion.");
         setError(getErrorMessage(uploadError));
+      },
+    };
+    const upload = createPressResumableUpload({
+      ...transportInput,
+      onError: (uploadError) => {
+        if (cancellingRef.current) return;
+        uploadRef.current = null;
+        // The resumable service can be down independently of storage itself;
+        // fall back to the plain signed-URL transport before surfacing an
+        // error. The failure happens before any bytes move, so nothing is
+        // lost by switching.
+        if (isTusTransportUnavailable(uploadError)) {
+          setStatus("Switching to the standard upload path…");
+          try {
+            directUploadRef.current = startPressDirectUpload(transportInput);
+            return;
+          } catch (directError) {
+            transportInput.onError(directError instanceof Error ? directError : new Error(String(directError)));
+            return;
+          }
+        }
+        transportInput.onError(uploadError instanceof Error ? uploadError : new Error(String(uploadError)));
       },
     });
     uploadRef.current = upload;
@@ -174,9 +203,17 @@ export function RecordingUploader({ onComplete, processingMessage }: { onComplet
   }
 
   async function pauseUpload() {
-    if (phase !== "uploading" || !uploadRef.current) return;
-    cancellingRef.current = true;
-    await uploadRef.current.abort(false);
+    if (phase !== "uploading") return;
+    if (uploadRef.current) {
+      cancellingRef.current = true;
+      await uploadRef.current.abort(false);
+    } else if (directUploadRef.current) {
+      cancellingRef.current = true;
+      directUploadRef.current.abort();
+      directUploadRef.current = null;
+    } else {
+      return;
+    }
     setPhase("paused");
     setStatus("Upload paused. Continue when you are ready.");
     setError(null);
