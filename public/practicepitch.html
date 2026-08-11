@@ -146,6 +146,7 @@ a{color:var(--navy)}
     <button class="tab" role="tab" data-v="opener">Opener Drill</button>
     <button class="tab" role="tab" data-v="obj">Objections</button>
     <button class="tab" role="tab" data-v="rp">Roleplay</button>
+    <button class="tab" role="tab" data-v="targets">Targets</button>
     <button class="tab" role="tab" data-v="scripts">Scripts</button>
     <button class="tab" role="tab" data-v="lib">Library</button>
   </nav>
@@ -271,6 +272,67 @@ I ran your numbers from public data before this call. Your Medicare panel suppor
           <button class="btn ghost" id="rpReset">Start over</button>
           <label class="voice-note" style="margin-left:auto"><input type="checkbox" id="rpTts" checked> Dana speaks aloud</label>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TARGETS -->
+  <section id="v-targets" hidden>
+    <div class="sec"><h2 style="font-size:22px">Target pipeline — NYC founding partners</h2>
+    <p class="lede">Verified from the 2024 UDS pipeline and per-org dossiers (repo: <code>docs/bootstrap/targets/</code>). "Their number" = duals × $1,125.48/yr at 10% enrollment — a planning figure, not a quote. Three founding slots total, which makes the scarcity line simply true.</p></div>
+
+    <div class="card sec">
+      <div class="eyebrow">This week's plan</div>
+      <div class="beats">
+        <div class="beat"><div class="bx" style="background:var(--navy);border-color:var(--navy);color:var(--accent-ink)">1</div><div><span class="bt">Brooklyn Plaza — cold call (test run)</span> <span class="bd">— (718) 596-9800, ask for CFO Daniel Desire's office. Honest-posture opener: "I'd rather ask than guess." ⚠️ NEVER mention their settlement history — internal calibration only.</span></div></div>
+        <div class="beat"><div class="bx" style="background:var(--navy);border-color:var(--navy);color:var(--accent-ink)">2</div><div><span class="bt">La Sante — cold call (the prize)</span> <span class="bd">— (718) 246-5700, ask for Mr. Blumenfrucht's office. He is CEO AND CFO and a CPA: one decision-maker, native audience for audit-defensibility. Richest dual density on the entire list.</span></div></div>
+        <div class="beat"><div class="bx" style="background:var(--navy);border-color:var(--navy);color:var(--accent-ink)">3</div><div><span class="bt">Morris Heights — warm conversion, not a cold call</span> <span class="bd">— existing discussion-stage relationship + a prepared first-cohort brief. Ask Jerri Rowe (Chief of Value Based Care) to convert the discussion into founding terms. First: confirm internally who received the brief.</span></div></div>
+      </div>
+    </div>
+
+    <div class="card sec" style="overflow-x:auto">
+      <div class="eyebrow">The board</div>
+      <table>
+        <thead><tr><th>Center</th><th>Where</th><th>Duals</th><th>@10% / yr</th><th>Call</th><th>Ask for</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td class="who">La Sante</td><td>Flatbush, BK</td><td>8,617 <span class="bd">(87.6% density — richest on list)</span></td><td><strong>~$970K</strong></td><td>(718) 246-5700</td><td>Gedalya Blumenfrucht, CPA — CEO+CFO</td><td><span class="pill good">This week</span></td></tr>
+          <tr><td class="who">Brooklyn Plaza</td><td>Fort Greene, BK</td><td>~1,150 <span class="bd">(estimate — UDS mix not public)</span></td><td>$65–195K range</td><td>(718) 596-9800</td><td>Daniel Desire, CPA — CFO</td><td><span class="pill good">This week</span></td></tr>
+          <tr><td class="who">Morris Heights</td><td>Bronx</td><td>2,301</td><td>~$259K</td><td>(718) 483-1270</td><td>Jerri Rowe — Chief of Value Based Care</td><td><span class="pill warn">Warm — convert</span></td></tr>
+          <tr><td class="who">BCHN</td><td>Bronx</td><td>12,957</td><td><strong>~$1.46M</strong></td><td>(718) 405-7720</td><td>Tashi Chodon — Chief Population Health Officer</td><td><span class="pill nv">Pipeline</span></td></tr>
+          <tr><td class="who">BronxCare (BCHISS)</td><td>Bronx</td><td>13,905</td><td><strong>~$1.57M</strong></td><td>(718) 901-8580</td><td>Saudah Muhammad — CEO of the FQHC entity</td><td><span class="pill nv">Pipeline</span></td></tr>
+          <tr><td class="who">Institute for Family Health</td><td>Manhattan/Bronx</td><td>8,591</td><td>~$967K</td><td>(212) 633-0800</td><td>Care-management billing owner</td><td><span class="pill nv">Pipeline</span></td></tr>
+          <tr><td class="who">Charles B. Wang</td><td>Chinatown/Flushing</td><td>3,484</td><td>~$392K</td><td>(212) 379-6988</td><td>Care-management billing owner</td><td><span class="pill nv">Pipeline</span></td></tr>
+          <tr><td class="who">Sunset Park (NYU Langone)</td><td>Brooklyn</td><td>10,493</td><td>~$1.18M</td><td>—</td><td>—</td><td><span class="pill crit">Skip for now — enterprise procurement</span></td></tr>
+          <tr><td class="who">Sun River Health</td><td>Multi-region</td><td>18,026</td><td>~$2.03M</td><td>—</td><td>—</td><td><span class="pill crit">Skip for now — too big/slow</span></td></tr>
+          <tr><td class="who">Ryan Health</td><td>Manhattan</td><td>1,364 <span class="bd">(16.6% — weak L3 math)</span></td><td>~$154K</td><td>—</td><td>—</td><td><span class="pill crit">Skip — low duals</span></td></tr>
+        </tbody>
+      </table>
+      <p class="note">Duals are HRSA-reported UDS figures except Brooklyn Plaza (stacked estimate — invite their number instead of quoting ours). Full dossiers with sources, objections, and entity flags live in the repo.</p>
+    </div>
+
+    <div class="card sec">
+      <div class="eyebrow">Coach — next best actions</div>
+      <div class="beats" id="crmCoach"></div>
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn primary" id="crmBrief">Copy AI briefing</button>
+        <button class="btn ghost" id="crmExport">Export CRM (JSON)</button>
+        <span class="note" id="crmBriefNote">Briefing → paste to Claude in any session for live coaching on your actual pipeline.</span>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="eyebrow" style="margin-bottom:10px">Account tracker <span style="letter-spacing:0;text-transform:none;color:var(--muted);font-weight:400">— saved in this browser; export before switching machines</span></div>
+      <div id="crmCards"></div>
+    </div>
+
+    <div class="card sec">
+      <div class="eyebrow">Per-account rules — the things that lose the deal if forgotten</div>
+      <div class="beats">
+        <div class="beat"><div class="bx">!</div><div><span class="bt">Brooklyn Plaza</span> <span class="bd">— 2020 OIG settlement (documentation controls) + 2014 Medicaid settlement are INTERNAL calibration only. Never say them. Pitch documentation-first; let them connect their own dots. If THEY raise it: "that's the argument for this, not against it."</span></div></div>
+        <div class="beat"><div class="bx">!</div><div><span class="bt">La Sante</span> <span class="bd">— one CPA holds both chairs. Lead with fee independence + audit-ready evidence; the 87.6% dual density means their number is nearly their whole Medicare panel — understate and let him scale it.</span></div></div>
+        <div class="beat"><div class="bx">!</div><div><span class="bt">BCHN</span> <span class="bd">— three CEO transitions in two years: route via Chodon (population health), lean on the 120-day walk-away, keep the ask low-commitment.</span></div></div>
+        <div class="beat"><div class="bx">!</div><div><span class="bt">BronxCare</span> <span class="bd">— TWO entities: pitch BCHISS (the FQHC grantee, CEO Saudah Muhammad), not the $1B hospital system. Quoting the wrong entity's numbers to the wrong CFO ends the meeting.</span></div></div>
+        <div class="beat"><div class="bx">!</div><div><span class="bt">Everyone</span> <span class="bd">— $93.79 not $117.24 · no caseload ratios · no promised reimbursement · never a percentage of collections · three founding slots is true, so say it.</span></div></div>
       </div>
     </div>
   </section>
@@ -532,8 +594,102 @@ For the compliance officer: fee independence · we never select a code · held l
 25–30 · The ask: 45-minute working session with the named billing owner, concrete day. Terms only if asked; one-pager after.`}
 ];
 
+/* ---------- CRM ---------- */
+const ACCOUNTS=[
+ {id:"bp",  name:"Brooklyn Plaza", who:"Daniel Desire, CPA (CFO)", phone:"(718) 596-9800", num:"$65–195K est.", rule:"NEVER mention their settlement history. Honest posture: “I'd rather ask than guess.”"},
+ {id:"lasante", name:"La Sante", who:"Gedalya Blumenfrucht, CPA (CEO+CFO)", phone:"(718) 246-5700", num:"~$970K @10%", rule:"One CPA holds both chairs — lead audit-defensibility + fee independence."},
+ {id:"mhhc", name:"Morris Heights", who:"Jerri Rowe (Chief of Value Based Care)", phone:"(718) 483-1270", num:"~$259K @10%", rule:"WARM — convert the existing discussion. First confirm who received the brief."},
+ {id:"bchn", name:"BCHN", who:"Tashi Chodon (Chief Population Health)", phone:"(718) 405-7720", num:"~$1.46M @10%", rule:"CEO churn ×3 in 2yrs — keep the ask low-commitment, lean on the 120-day walk-away."},
+ {id:"bronxcare", name:"BronxCare (BCHISS)", who:"Saudah Muhammad (CEO, FQHC entity)", phone:"(718) 901-8580", num:"~$1.57M @10%", rule:"Pitch BCHISS the grantee, NOT the $1B hospital system."},
+ {id:"ifh", name:"Institute for Family Health", who:"billing owner (ask)", phone:"(212) 633-0800", num:"~$967K @10%", rule:""},
+ {id:"cbw", name:"Charles B. Wang", who:"billing owner (ask)", phone:"(212) 379-6988", num:"~$392K @10%", rule:""}
+];
+const STATUSES={not_started:"Not started",called_na:"Called — no answer",gatekeeper:"Blocked at gatekeeper",voicemail:"Left voicemail",emailed:"Emailed",meeting_booked:"Meeting booked",met:"Met — awaiting next step",working_session:"Working session booked",order_form:"Order form out",signed:"SIGNED 🎉",dead:"Dead / recycle later"};
+const NEXT_MOVE={
+ not_started:a=>`Cold call ${a.phone} — ask for ${a.who}. Drill the opener first.`,
+ called_na:()=>"Call again tomorrow 9–10am — admins answer before clinic rush.",
+ gatekeeper:()=>"Retry at lunch or after 4pm. If blocked twice, switch to the email route (Scripts → Cold email 1).",
+ voicemail:()=>"Send the follow-up email within the hour (Scripts → Cold email 1). Call again in 2 days.",
+ emailed:()=>"No reply in 4 days → send the constraint email (Scripts → Cold email 2).",
+ meeting_booked:()=>"Prep: read the dossier, personalize the one-pager, say the 5 numbers out loud the morning of.",
+ met:()=>"Send the same-day recap TODAY (Scripts → recap) with the working-session ask + a concrete date.",
+ working_session:()=>"Bring the activation acceptance walkthrough. Their RCM signing off IS the gate.",
+ order_form:()=>"At signature: Phase 1 begins — BAAs + covered environment (Library → activation path).",
+ signed:()=>"Log the press moment. The 45-day go-live clock is running.",
+ dead:()=>"Note why in the log. Recycle in 90 days — the arithmetic stays true."
+};
+store.crm=store.crm||{};
+function crmGet(id){return store.crm[id]||(store.crm[id]={status:"not_started",nextDate:"",notes:"",log:[]})}
+function crmRender(){
+  // coach: overdue first, then plan order
+  const today_=today();
+  const coach=[];
+  ACCOUNTS.forEach(a=>{const c=crmGet(a.id);
+    if(c.status==="signed"||c.status==="dead")return;
+    const overdue=c.nextDate&&c.nextDate<=today_;
+    coach.push({a,c,overdue,move:NEXT_MOVE[c.status](a)});});
+  coach.sort((x,y)=>(y.overdue?1:0)-(x.overdue?1:0));
+  document.getElementById("crmCoach").innerHTML=coach.slice(0,5).map(x=>
+    `<div class="beat ${x.overdue?"":""}" style="${x.overdue?"border-color:var(--crit);background:var(--crit-bg)":""}">
+      <div class="bx" style="${x.overdue?"background:var(--crit);border-color:var(--crit)":"background:var(--navy);border-color:var(--navy)"};color:var(--accent-ink)">${x.overdue?"!":"→"}</div>
+      <div><span class="bt">${x.a.name}${x.overdue?" — action overdue":""}</span> <span class="bd">— ${x.move}${x.a.rule?" · "+x.a.rule:""}</span></div></div>`).join("")||'<p class="note">Pipeline clear — go find another door.</p>';
+  // cards
+  document.getElementById("crmCards").innerHTML=ACCOUNTS.map(a=>{
+    const c=crmGet(a.id);
+    const log=c.log.slice(-4).reverse().map(l=>`<div class="note">· ${l.d} — ${l.t}</div>`).join("");
+    return `<details class="scr"><summary>${a.name} <span class="pill ${c.status==="signed"?"good":c.status==="dead"?"crit":c.status==="not_started"?"nv":"warn"}" style="margin-left:auto">${STATUSES[c.status]}</span></summary>
+    <div class="body">
+      <p class="note" style="margin-top:0">${a.who} · ${a.phone} · ${a.num}${a.rule?"<br>⚠️ "+a.rule:""}</p>
+      <div class="btnrow" style="margin:8px 0">
+        <select data-crm="${a.id}" class="crmStatus" style="border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;background:var(--panel);color:var(--ink);font-size:13.5px">
+          ${Object.entries(STATUSES).map(([k,v])=>`<option value="${k}" ${k===c.status?"selected":""}>${v}</option>`).join("")}
+        </select>
+        <label class="note">Next action: <input type="date" value="${c.nextDate}" data-crmdate="${a.id}" style="border:1.5px solid var(--line);border-radius:8px;padding:6px 8px;background:var(--panel);color:var(--ink)"></label>
+      </div>
+      <textarea data-crmnotes="${a.id}" placeholder="Notes — what they said, who answered, their number…" style="min-height:56px">${c.notes}</textarea>
+      <div class="btnrow" style="margin-top:8px">
+        <input type="text" placeholder="Log an event (e.g. 'spoke to gatekeeper, CFO back Thurs')" data-crmlog="${a.id}" style="flex:1;min-width:200px;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--panel);color:var(--ink);font-size:13.5px">
+        <button class="btn ghost small" data-crmlogbtn="${a.id}">Log</button>
+      </div>
+      <div style="margin-top:6px">${log}</div>
+      <div class="callout" style="margin-top:10px"><p><strong>Next move:</strong> ${NEXT_MOVE[c.status](a)}</p></div>
+    </div></details>`}).join("");
+}
+document.addEventListener("change",e=>{
+  const s=e.target.closest(".crmStatus"); if(s){const c=crmGet(s.dataset.crm);c.status=s.value;c.log.push({d:today(),t:"Status → "+STATUSES[s.value]});save();crmRender();markPractice("crm");return}
+  const d=e.target.closest("[data-crmdate]"); if(d){crmGet(d.dataset.crmdate).nextDate=d.value;save();crmRender();return}
+});
+document.addEventListener("input",e=>{
+  const n=e.target.closest("[data-crmnotes]"); if(n){crmGet(n.dataset.crmnotes).notes=n.value;save()}
+});
+document.addEventListener("click",e=>{
+  const b=e.target.closest("[data-crmlogbtn]"); if(!b)return;
+  const inp=document.querySelector(`[data-crmlog="${b.dataset.crmlogbtn}"]`);
+  if(inp&&inp.value.trim()){crmGet(b.dataset.crmlogbtn).log.push({d:today(),t:inp.value.trim()});inp.value="";save();crmRender()}
+});
+function crmBriefing(){
+  const lines=["KEPT COUNT PIPELINE BRIEFING — generated "+today()+" from the Pitch Gym CRM.","Coach me on next moves. Repo dossiers: docs/bootstrap/targets/.",""];
+  ACCOUNTS.forEach(a=>{const c=crmGet(a.id);
+    lines.push(`## ${a.name} — ${STATUSES[c.status]}${c.nextDate?" · next action "+c.nextDate:""}`);
+    lines.push(`Contact: ${a.who} · ${a.phone} · number: ${a.num}${a.rule?" · rule: "+a.rule:""}`);
+    if(c.notes)lines.push("Notes: "+c.notes);
+    c.log.slice(-5).forEach(l=>lines.push(`- ${l.d}: ${l.t}`));
+    lines.push("");});
+  return lines.join("\n");
+}
+document.getElementById("crmBrief").onclick=async()=>{
+  try{await navigator.clipboard.writeText(crmBriefing());
+    document.getElementById("crmBriefNote").textContent="Copied — paste it to Claude and ask for coaching.";}
+  catch(e){document.getElementById("crmBriefNote").textContent="Clipboard blocked — use Export instead.";}
+};
+document.getElementById("crmExport").onclick=()=>{
+  const url=URL.createObjectURL(new Blob([JSON.stringify({exported:today(),crm:store.crm},null,2)],{type:"application/json"}));
+  const a=document.createElement("a");a.href=url;a.download="pitch-gym-crm-"+today()+".json";a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),4000);
+};
+
 /* ---------- tab router ---------- */
-const views=["dash","cards","opener","obj","rp","scripts"];
+const views=["dash","cards","opener","obj","rp","targets","scripts","lib"];
 document.getElementById("tabs").addEventListener("click",e=>{
   const b=e.target.closest(".tab"); if(!b)return;
   document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t===b));
@@ -845,5 +1001,5 @@ document.getElementById("dlOnePager").onclick=()=>{
 })();
 /* ---------- boot ---------- */
 if(hasTTS)speechSynthesis.getVoices();
-renderStreak(); renderDash(); buildOrder(); opRenderBeats(""); renderOpHist(); renderScripts(); rpStart();
+renderStreak(); renderDash(); buildOrder(); opRenderBeats(""); renderOpHist(); renderScripts(); rpStart(); crmRender();
 </script>
