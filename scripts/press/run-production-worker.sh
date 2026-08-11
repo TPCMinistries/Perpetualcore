@@ -6,7 +6,10 @@ export PRESS_API_BASE_URL="${PRESS_API_BASE_URL:-https://perpetualcore.com}"
 export PRESS_WORKER_ID="${PRESS_WORKER_ID:-press-worker-$(/bin/hostname -s)}"
 export PRESS_WORKER_RECOVERY_SWEEP_MS="${PRESS_WORKER_RECOVERY_SWEEP_MS:-300000}"
 export PRESS_WORKER_HEARTBEAT_MS="${PRESS_WORKER_HEARTBEAT_MS:-60000}"
-export PRESS_WORKER_PROCESS_TIMEOUT_MS="${PRESS_WORKER_PROCESS_TIMEOUT_MS:-1800000}"
+# 3 hours: whisper on a 75-minute recording exceeds 30 minutes on the Mac
+# mini and was killed mid-transcription three times (job dead, project
+# failed). Sized for the 512 MB / feature-length pilot ceiling.
+export PRESS_WORKER_PROCESS_TIMEOUT_MS="${PRESS_WORKER_PROCESS_TIMEOUT_MS:-10800000}"
 export PRESS_WORKER_MAX_DOWNLOAD_BYTES="${PRESS_WORKER_MAX_DOWNLOAD_BYTES:-536870912}"
 export PRESS_WHISPER_COMMAND="${PRESS_WHISPER_COMMAND:-/opt/homebrew/bin/whisper}"
 export PRESS_WHISPER_MODEL="${PRESS_WHISPER_MODEL:-small}"
