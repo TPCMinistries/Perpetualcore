@@ -142,6 +142,7 @@ a{color:var(--navy)}
   </div>
   <nav class="tabs" role="tablist" id="tabs">
     <button class="tab" role="tab" data-v="dash" aria-selected="true">Dashboard</button>
+    <button class="tab" role="tab" data-v="product">Product</button>
     <button class="tab" role="tab" data-v="cards">Flashcards</button>
     <button class="tab" role="tab" data-v="opener">Opener Drill</button>
     <button class="tab" role="tab" data-v="obj">Objections</button>
@@ -176,6 +177,75 @@ a{color:var(--navy)}
       <div class="eyebrow">The one-liner</div>
       <p style="font-size:18px;font-family:var(--heading);font-weight:600;color:var(--ink);margin:6px 0 2px">“Kept Count is the evidence ledger for Medicare care management. You bill — we prove the work happened, member by member, month by month, audit-ready.”</p>
       <p class="note">Say it until it's boring to you. Then it'll sound natural to them.</p>
+    </div>
+  </section>
+
+  <!-- PRODUCT -->
+  <section id="v-product" hidden>
+    <div class="sec"><h2 style="font-size:22px">The product — what Kept Count actually is</h2>
+    <p class="lede">New to the team? Start here. This is the app itself, what's real today, and how to talk about it to anyone. Live product: keptcount.com. Source of truth: <code>docs/PRODUCT-SURFACE-MAP.md</code> in the repo.</p></div>
+
+    <div class="card sec">
+      <div class="eyebrow">The spine — memorize this before any feature</div>
+      <p style="font-size:17px;font-family:var(--heading);font-weight:600;color:var(--ink);margin:4px 0">member → documented work → evidence → money or proof</p>
+      <p>Everything in the platform is that one chain, viewed from a different altitude by a different person. If you can say the chain, you can explain any screen.</p>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Altitude</th><th>Who</th><th>The question it answers</th></tr></thead>
+        <tbody>
+          <tr><td class="who">1 · Member</td><td>Navigator</td><td>Who needs me right now, and what do I do for this person today?</td></tr>
+          <tr><td class="who">2 · Open month</td><td>Supervisor</td><td>Is the book of business on track — what can still be fixed?</td></tr>
+          <tr><td class="who">3 · Closed month</td><td>Supervisor / practice</td><td>What did we document, what is supportable, what was held?</td></tr>
+          <tr><td class="who">4 · Program</td><td>External partner</td><td>Is the program working — without exposing anyone's patients?</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="sec">
+    <details class="scr" open><summary>Tour — the surfaces worth knowing, and the one idea behind each</summary><div class="body">
+      <p><strong>Worklist</strong> — ranks the navigator's day by which member-months can still be saved. Safety alerts are pinned above revenue, always — a 12-minute shortfall can never outrank an unacknowledged crisis alert. That ordering is enforced by tests, not policy.</p>
+      <p><strong>Capture</strong> — field-fast contact logging. Site and funding source stay sticky between saves (re-picking 30× an afternoon is how capture stops happening); identity is optional at capture, because you can't demand an ID before a blood-pressure check.</p>
+      <p><strong>Member → patient month</strong> — the evidence view: minutes, activities, consent, initiating-visit status, per code family, per month. This is what "we prove the work happened" looks like on screen.</p>
+      <p><strong>Revenue-at-risk vs Billing</strong> — same subject, two surfaces on purpose. Revenue-at-risk is the open month (what can still be fixed); Billing is the closed month (what settled). Different questions, different people, deliberately not merged.</p>
+      <p><strong>The billing packet</strong> — supported lines vs held lines, each held line with its reason (below threshold, no consent, awaiting review, no initiating visit). Immutable artifact with a hash; their biller records line dispositions; their coder decides the claim. <em>Holding lines back is the feature</em> — it's what makes a compliance officer a fan.</p>
+      <p><strong>Health Home pack (NY)</strong> — a different payment model: a month clears a contact count or silently downgrades (downstate: $925 → $387, a 58% loss from documentation alone). The pack reports at-risk as the delta, not the full rate — overstating exposure gets you dismissed by anyone who knows their rates.</p>
+      <p><strong>Outreach & events</strong> — the church-event → roster → attribution path. Follow-up ranks consented-then-stalled people first: consent is the expensive step and it's already paid for.</p>
+      <p><strong>Funder report</strong> — grant-facing impact cut with banded demographics and small-cell suppression (minimum cell 11, all-or-nothing) so no report can identify a person by subtraction.</p>
+      <p><strong>Network</strong> — cross-org roll-up for a lead entity, aggregate-only. No drill-through exists by design; adding one is a legal boundary, not a UI change.</p>
+      <p><strong>Integration planes</strong> (EHR · claims · safety delivery) — rehearsal-ready seams, everything fail-closed behind hard-off flags. <em>A route existing is not a vendor being activated</em> — activation is a per-buyer decision with signed gates.</p>
+      <p><strong>Integration ops AI</strong> — reads receipts, summarizes, proposes next steps for a human. It cannot choose a code, match a patient, send anything, or write anywhere. Every AI in the product is advisory and evidence-linked; that's a sales point, not a limitation.</p>
+    </div></details>
+
+    <details class="scr"><summary>How to talk about it — one line per audience</summary><div class="body">
+      <p><strong>CEO:</strong> "New, additive Medicare revenue for care work your team already does — with evidence that survives an audit."</p>
+      <p><strong>CFO:</strong> "A flat fee that never moves with your billing, your own panel's arithmetic, and a 120-day walk-away if we don't prove it."</p>
+      <p><strong>CMO:</strong> "Your clinicians keep every clinical decision — and in the navigator's queue, safety outranks revenue by construction."</p>
+      <p><strong>Compliance officer:</strong> "Ask what you'd want a vendor to refuse to do — that's our feature list. We never choose a code, the packet holds lines back, the audit trail is append-only."</p>
+      <p><strong>RCM / billing director:</strong> "We replace exactly one input to your existing process — the assembly step — and it arrives audit-ready. The claim stays yours."</p>
+      <p><strong>A navigator (end user):</strong> "It tells you who needs you today, and turns the work you already do into credit for it."</p>
+      <p><strong>Your family at dinner:</strong> "Health centers do a lot of care work Medicare would pay for, but they can't prove it well enough to bill it. We're the proof."</p>
+    </div></details>
+
+    <details class="scr"><summary>What we never say — the boundary list</summary><div class="body">
+      <ul>
+        <li>We never say <strong>"we bill"</strong> or "we submit claims" — they bill; we prove the work happened.</li>
+        <li>We never call it <strong>an EHR</strong> or a care-delivery tool — it's the evidence ledger beside their EHR.</li>
+        <li>We never say <strong>"we increase your billing"</strong> — we evidence work already done. (Recovered revenue, not generated revenue.)</li>
+        <li>We never <strong>guarantee reimbursement</strong> or audit outcomes — "we make you auditable," never "we make you compliant."</li>
+        <li>We never quote <strong>$117.24</strong> without the QMB discount — the modeled number is $93.79.</li>
+        <li>We never cite <strong>caseload ratios</strong> (unconfirmed in primary sources) and never take <strong>a percentage of collections</strong> — the refusal is the sales asset.</li>
+        <li>We never claim <strong>AI decides</strong> anything clinical or financial — it's advisory, evidence-linked, read-only.</li>
+        <li>We never claim a vendor/EHR/clearinghouse <strong>integration is live</strong> — seams exist; activation is gated per buyer.</li>
+      </ul>
+    </div></details>
+
+    <details class="scr"><summary>Honest FAQ — quick answers for anyone who asks</summary><div class="body">
+      <p><strong>Is it live?</strong> Yes — keptcount.com, demo-ready on synthetic data, 1,000+ automated tests. The covered (real-data) environment is provisioned when a pilot signs, behind signed BAAs.</p>
+      <p><strong>Is there real patient data in it?</strong> No. Everything today is synthetic by design. Real PHI only ever enters a dedicated HIPAA environment that doesn't exist until a pilot signs.</p>
+      <p><strong>Does it text patients?</strong> Not in founding scope — deferred deliberately (carrier registration requires the incorporated entity, and inbound crisis replies create a duty to respond that must be staffed first). The ledger records escalation handoffs to the practice's own protocols.</p>
+      <p><strong>Does it replace our EHR / billing system?</strong> No. It sits beside them: roster in via CSV or FHIR, evidence packet out to the existing billing flow. Nothing about their claim submission changes.</p>
+      <p><strong>Who's behind it?</strong> Kept Count, Inc. (in formation) — founder Lorenzo Daughtry-Chambers. Deliberately small: three founding health centers, onboarded properly rather than quickly.</p>
+      <p><strong>What does it cost?</strong> Founding terms: $15–25K implementation, $2,500/mo for a 120-day proof with defined acceptance criteria and a walk-away, then $22 per active managed patient/mo ($5K minimum, rate locked 24 months). Never a percentage of collections.</p>
+    </div></details>
     </div>
   </section>
 
@@ -689,7 +759,7 @@ document.getElementById("crmExport").onclick=()=>{
 };
 
 /* ---------- tab router ---------- */
-const views=["dash","cards","opener","obj","rp","targets","scripts","lib"];
+const views=["dash","product","cards","opener","obj","rp","targets","scripts","lib"];
 document.getElementById("tabs").addEventListener("click",e=>{
   const b=e.target.closest(".tab"); if(!b)return;
   document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t===b));
