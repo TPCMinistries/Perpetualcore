@@ -1,0 +1,1042 @@
+<meta name="robots" content="noindex,nofollow">
+<title>BlackIvy · Meeting Gym</title>
+<style>
+:root{
+  --pine:#1e4a3c; --pine-deep:#143529; --brass:#8f6a1a; --brass-soft:#c09a3e;
+  --bg:#f5f8f5; --panel:#ffffff; --panel-2:#ecf2ed; --ink:#0f1f19; --body:#31423a; --muted:#5c6c63;
+  --line:#d5e0d7; --line-soft:#e4ece5;
+  --good:#1e7d4f; --good-bg:#e5f3ec; --warn:#a8751d; --warn-bg:#f8f1df; --crit:#b03030; --crit-bg:#f9e9e9;
+  --accent-ink:#ffffff; --shadow:0 1px 3px rgba(15,31,25,.08),0 4px 16px rgba(15,31,25,.06);
+  --heading:'Avenir Next','Segoe UI',system-ui,-apple-system,sans-serif;
+  --sans:'Avenir Next','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --pine:#7cb9a0; --pine-deep:#9ccbb7; --brass:#c09a3e; --brass-soft:#8f6a1a;
+    --bg:#0c1512; --panel:#132520; --panel-2:#0f1e19; --ink:#e8f1ec; --body:#c2d2ca; --muted:#83958b;
+    --line:#26413a; --line-soft:#1b322b;
+    --good:#4dbd85; --good-bg:#12301f; --warn:#d8a94e; --warn-bg:#33270e; --crit:#e07070; --crit-bg:#361414;
+    --accent-ink:#0c1512; --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --pine:#7cb9a0; --pine-deep:#9ccbb7; --brass:#c09a3e; --brass-soft:#8f6a1a;
+  --bg:#0c1512; --panel:#132520; --panel-2:#0f1e19; --ink:#e8f1ec; --body:#c2d2ca; --muted:#83958b;
+  --line:#26413a; --line-soft:#1b322b;
+  --good:#4dbd85; --good-bg:#12301f; --warn:#d8a94e; --warn-bg:#33270e; --crit:#e07070; --crit-bg:#361414;
+  --accent-ink:#0c1512; --shadow:0 1px 3px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.3);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--body);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4{font-family:var(--heading);color:var(--ink);font-weight:600;line-height:1.15;margin:0;text-wrap:balance}
+button{font-family:var(--sans);cursor:pointer}
+.wrap{max-width:1060px;margin:0 auto;padding:0 20px 60px}
+.top{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line)}
+.topin{max-width:1060px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mark{display:flex;align-items:center;gap:10px}
+.mark .bi{width:34px;height:34px;border-radius:8px;background:var(--pine);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--heading);font-weight:700;font-size:14px;letter-spacing:.02em}
+.mark .t{font-family:var(--heading);font-weight:600;color:var(--ink);font-size:16px}
+.mark .t span{color:var(--muted);font-weight:400}
+.count{margin-left:auto;display:flex;align-items:center;gap:6px;font-variant-numeric:tabular-nums;color:var(--brass);font-family:var(--heading);font-weight:600;font-size:14px}
+.tabs{display:flex;gap:4px;overflow-x:auto;max-width:1060px;margin:0 auto;padding:0 20px}
+.tab{border:none;background:none;color:var(--muted);font-size:14px;font-weight:600;font-family:var(--heading);padding:10px 14px;border-bottom:2.5px solid transparent;white-space:nowrap}
+.tab[aria-selected="true"]{color:var(--pine);border-bottom-color:var(--pine)}
+.tab:focus-visible,.btn:focus-visible,button:focus-visible{outline:2px solid var(--pine);outline-offset:2px}
+.grid{display:grid;gap:14px}
+.g3{grid-template-columns:repeat(3,1fr)}.g2{grid-template-columns:repeat(2,1fr)}.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:760px){.g3,.g4{grid-template-columns:repeat(2,1fr)}.g2{grid-template-columns:1fr}}
+@media(max-width:460px){.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.tile{background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow)}
+.tile .lab{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600;font-family:var(--heading)}
+.tile .val{font-size:26px;font-family:var(--heading);font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px}
+.tile .sub{font-size:12px;color:var(--muted)}
+.eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--pine);font-weight:600;font-family:var(--heading);margin-bottom:6px}
+.sec{margin-top:26px}
+p.lede{font-size:16px;color:var(--body);max-width:64ch}
+.btn{border:none;border-radius:9px;padding:10px 18px;font-weight:600;font-size:14px;font-family:var(--heading)}
+.btn.primary{background:var(--pine);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.1)}
+.btn.ghost{background:none;border:1.5px solid var(--line);color:var(--body)}
+.btn.ghost:hover{border-color:var(--pine);color:var(--pine)}
+.btn:disabled{opacity:.45;cursor:default}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:3px 11px;font-size:12px;font-weight:600;font-family:var(--heading)}
+.pill.good{background:var(--good-bg);color:var(--good)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.crit{background:var(--crit-bg);color:var(--crit)}
+.pill.nv{background:var(--panel-2);color:var(--pine)}
+.beats{display:flex;flex-direction:column;gap:7px;margin:10px 0}
+.beat{display:flex;gap:9px;align-items:flex-start;padding:8px 11px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line-soft);font-size:13.5px;transition:background .3s,border-color .3s}
+.beat .bx{width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none;margin-top:1px;display:grid;place-items:center;font-size:11px;color:var(--accent-ink)}
+.beat.hit{background:var(--good-bg);border-color:var(--good)}
+.beat.hit .bx{background:var(--good);border-color:var(--good)}
+.beat.hit .bt{color:var(--good)}
+.beat.trap{background:var(--crit-bg);border-color:var(--crit)}
+.beat.trap .bx{background:var(--crit);border-color:var(--crit)}
+.beat.trap .bt{color:var(--crit)}
+.bt{font-weight:600;color:var(--ink)}
+.bd{color:var(--muted);font-size:12.5px}
+.transcript{min-height:90px;border:1.5px dashed var(--line);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--body);background:var(--panel-2)}
+.transcript.live{border-color:var(--crit);border-style:solid}
+.transcript .interim{color:var(--muted);font-style:italic}
+textarea{width:100%;min-height:90px;border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--body);background:var(--panel);font-family:var(--sans);resize:vertical}
+.fc{perspective:1200px;max-width:560px;margin:0 auto}
+.fcin{position:relative;min-height:240px;transform-style:preserve-3d;transition:transform .45s;border-radius:14px}
+@media(prefers-reduced-motion:reduce){.fcin{transition:none}}
+.fc.flip .fcin{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;background:var(--panel);border:1px solid var(--line-soft);box-shadow:var(--shadow);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:28px;gap:8px;overflow-y:auto}
+.face.back{transform:rotateY(180deg);background:var(--panel-2)}
+.face .q{font-size:19px;font-family:var(--heading);font-weight:600;color:var(--ink);text-wrap:balance}
+.face .a{font-size:16px;color:var(--body);max-width:48ch}
+.face .deckl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.deckbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.deckbtn{border:1.5px solid var(--line);background:none;border-radius:99px;padding:5px 13px;font-size:13px;font-weight:600;color:var(--muted)}
+.deckbtn.on{border-color:var(--pine);color:var(--pine);background:var(--panel-2)}
+.ring{width:74px;height:74px;flex:none}
+.ring circle{fill:none;stroke-width:6}
+.ring .bgc{stroke:var(--line-soft)}
+.ring .fgc{stroke:var(--pine);stroke-linecap:round;transition:stroke-dashoffset 1s linear}
+.ring text{font:600 17px var(--heading);fill:var(--ink)}
+.chat{display:flex;flex-direction:column;gap:12px;max-height:440px;overflow-y:auto;padding:6px 2px}
+.msg{max-width:82%;padding:11px 14px;border-radius:13px;font-size:14.5px;line-height:1.45}
+.msg.him{background:var(--panel-2);border:1px solid var(--line-soft);color:var(--body);align-self:flex-start;border-bottom-left-radius:4px}
+.msg.me{background:var(--pine);color:var(--accent-ink);align-self:flex-end;border-bottom-right-radius:4px}
+.msg .who{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;opacity:.7;margin-bottom:3px;font-family:var(--heading)}
+.msg.debrief{background:var(--warn-bg);border:1px solid var(--warn);color:var(--body);align-self:stretch;max-width:100%}
+details.scr{border:1px solid var(--line-soft);border-radius:11px;background:var(--panel);box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden}
+details.scr summary{padding:14px 18px;font-family:var(--heading);font-weight:600;color:var(--ink);cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}
+details.scr summary::after{content:"+";margin-left:auto;color:var(--muted);font-size:18px}
+details.scr[open] summary::after{content:"–"}
+details.scr .body{padding:2px 18px 18px;font-size:14.5px}
+details.scr .body p{margin:0 0 .7em}
+.quote{border-left:3px solid var(--pine);background:var(--panel-2);padding:12px 16px;border-radius:0 9px 9px 0;margin:.5em 0;white-space:pre-wrap}
+.note{font-size:12.5px;color:var(--muted)}
+.divider{border:none;border-top:1px solid var(--line-soft);margin:16px 0}
+.workout{padding-left:20px;margin:8px 0}
+.workout li{margin-bottom:6px}
+.done-x{color:var(--good);font-weight:700}
+.mini-hist{display:flex;gap:4px;align-items:flex-end;height:38px;margin-top:8px}
+.mini-hist div{width:12px;border-radius:3px 3px 0 0;background:var(--pine);opacity:.85;min-height:4px}
+.voice-note{font-size:12px;color:var(--muted);display:flex;gap:6px;align-items:center}
+kbd{background:var(--panel-2);border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-size:12px;font-family:var(--heading)}
+a{color:var(--pine)}
+.gate{position:fixed;inset:0;z-index:99;background:var(--bg);display:grid;place-items:center;padding:20px}
+.gate .gcard{background:var(--panel);border:1px solid var(--line-soft);border-radius:14px;box-shadow:var(--shadow);padding:34px;max-width:360px;width:100%;text-align:center}
+.gate input{width:100%;border:1.5px solid var(--line);border-radius:9px;padding:11px 14px;font-size:16px;text-align:center;letter-spacing:.2em;background:var(--panel-2);color:var(--ink);margin:14px 0 10px;font-family:var(--heading)}
+.chipline{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.chip{background:var(--panel-2);border:1px solid var(--line-soft);border-radius:8px;padding:6px 12px;font-size:13.5px;font-weight:600;color:var(--ink);font-family:var(--heading)}
+.chip b{color:var(--pine)}
+.live-big{font-size:20px;font-family:var(--heading);font-weight:600;color:var(--ink);line-height:1.35}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{text-align:left;font-family:var(--heading);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:2px solid var(--line)}
+td{padding:9px 10px;border-bottom:1px solid var(--line-soft);vertical-align:top}
+td.who{font-weight:600;color:var(--ink)}
+.mine{border:1px solid var(--crit);border-left-width:4px;border-radius:9px;padding:12px 15px;margin-bottom:10px;background:var(--panel)}
+.mine .mt{font-weight:600;color:var(--crit);font-family:var(--heading);font-size:14px}
+.mine .mw{font-size:13.5px;margin-top:3px}
+.mine .ms{font-size:13px;color:var(--good);margin-top:5px;font-weight:500}
+</style>
+
+<div class="top">
+  <div class="topin">
+    <div class="mark"><div class="bi">BI</div><div class="t">Meeting Gym <span>· Bryant Welters · BlackIvy</span></div></div>
+    <div class="count" id="countdown" title="Time to the call">—</div>
+  </div>
+  <nav class="tabs" role="tablist" id="tabs">
+    <button class="tab" role="tab" data-v="dash" aria-selected="true">Dashboard</button>
+    <button class="tab" role="tab" data-v="live" aria-selected="false">Call Mode</button>
+    <button class="tab" role="tab" data-v="room" aria-selected="false">The Room</button>
+    <button class="tab" role="tab" data-v="plan" aria-selected="false">Game Plan</button>
+    <button class="tab" role="tab" data-v="cards" aria-selected="false">Flashcards</button>
+    <button class="tab" role="tab" data-v="opener" aria-selected="false">Opener Drill</button>
+    <button class="tab" role="tab" data-v="qa" aria-selected="false">Q&amp;A Roulette</button>
+    <button class="tab" role="tab" data-v="rp" aria-selected="false">Roleplay</button>
+    <button class="tab" role="tab" data-v="mines" aria-selected="false">Landmines</button>
+    <button class="tab" role="tab" data-v="scripts" aria-selected="false">Scripts</button>
+    <button class="tab" role="tab" data-v="follow" aria-selected="false">Follow-up</button>
+  </nav>
+</div>
+
+<main class="wrap">
+
+<!-- ============ DASHBOARD ============ -->
+<section id="v-dash">
+  <div class="sec">
+    <div class="eyebrow">Wednesday · 11:00 AM ET · via Jessica Gamzon</div>
+    <h1 style="font-size:26px">Bryant wants to learn what IHA does. Let him leave knowing exactly one thing.</h1>
+    <p class="lede">This is a first conversation, not a pitch. The win condition: Bryant can repeat the one-liner to Cheryl Mills without your help, and there's a concrete next step on the calendar. Everything here is built from the brief that went out and the standing rules in the vault.</p>
+  </div>
+
+  <div class="grid g4 sec" id="statTiles"></div>
+
+  <div class="grid g2 sec">
+    <div class="card">
+      <div class="eyebrow">Prep circuit — before 11 AM</div>
+      <ol class="workout" id="workout"></ol>
+      <p class="note">Each item checks itself off as you complete it in the app. The two reading items check off on click.</p>
+    </div>
+    <div class="card">
+      <div class="eyebrow">The Kenya numbers — recite cold</div>
+      <div class="beats" id="fiveNumbers"></div>
+      <p class="note">⚠️ The 350+ pastors <em>are</em> the network. There is no separate "400+ faith leaders" figure — the ~400 is the business conference.</p>
+    </div>
+  </div>
+
+  <div class="card sec">
+    <div class="eyebrow">The one-liner</div>
+    <p style="font-size:18px;font-family:var(--heading);font-weight:600;color:var(--ink);margin:6px 0 2px">"BlackIvy builds the hard infrastructure of African growth. We build the human infrastructure — trained talent and standing community trust — in the same markets. Same countries, same conviction, different layers of one stack."</p>
+    <p class="note">Peers with complementary layers. Never "their success depends on us" — say what we bring; don't claim their outcome hinges on it.</p>
+  </div>
+
+  <div class="card sec">
+    <div class="eyebrow">The single most important posture note</div>
+    <p style="margin:4px 0"><strong style="color:var(--ink)">You are not coming with an ask.</strong> The cover email already told him so. The realistic near-term money is <em>commercial</em> — BlackIvy funding or contracting a workforce/health pilot around a portfolio company — but that's a door <em>they</em> open. Your only close: keep the maps side by side, and get a next step.</p>
+  </div>
+</section>
+
+<!-- ============ CALL MODE ============ -->
+<section id="v-live" hidden>
+  <div class="sec">
+    <div class="eyebrow">Keep this tab open during the call · glance, don't read</div>
+    <h2 style="font-size:22px">Call Mode</h2>
+  </div>
+  <div class="card sec">
+    <div class="eyebrow">The one-liner</div>
+    <p class="live-big">"BlackIvy builds the hard infrastructure of African growth. We build the human infrastructure — trained talent and standing community trust — in the same markets. Different layers of one stack."</p>
+  </div>
+  <div class="grid g2 sec">
+    <div class="card">
+      <div class="eyebrow">The numbers</div>
+      <div class="chipline">
+        <span class="chip"><b>2,500+</b> served</span><span class="chip"><b>3</b> cities</span><span class="chip"><b>14</b> days</span>
+        <span class="chip"><b>~1,000</b> revival + training</span><span class="chip"><b>~400</b> conference · U. of Nairobi</span>
+        <span class="chip"><b>350+</b> pastors = THE network</span><span class="chip"><b>50+</b> orgs</span><span class="chip"><b>Ghana</b> summer 2027</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Landmine top five</div>
+      <div class="chipline">
+        <span class="chip" style="color:var(--crit)">No $ on DeepFutures — "in formation"</span>
+        <span class="chip" style="color:var(--crit)">No ask — conversation only</span>
+        <span class="chip" style="color:var(--crit)">No Tanzania claim</span>
+        <span class="chip" style="color:var(--crit)">No Ascent / October</span>
+        <span class="chip" style="color:var(--crit)">No CINQCARE talk</span>
+      </div>
+    </div>
+  </div>
+  <div class="grid g2 sec">
+    <div class="card">
+      <div class="eyebrow">Ask him</div>
+      <ul style="margin:6px 0;padding-left:18px;font-size:14px">
+        <li>What does External Affairs own — between portfolio and the outside world?</li>
+        <li>Where do portfolio companies feel talent constraints most?</li>
+        <li>How do you approach local adoption + trust at a new site?</li>
+        <li>Next 18 months across Accra / Nairobi / Dar?</li>
+        <li>Is Lions-to-Unicorns still the frame?</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">If he asks "what could this look like" — shapes, not a menu</div>
+      <p style="font-size:14px;margin:4px 0"><strong>Pilot</strong> — health + workforce around one venture; Kenya first.<br><strong>Co-build</strong> — joint workforce company; an asset, not an expense.<br><strong>Co-invest</strong> — later, with capital partners + DeepFutures as it forms.</p>
+      <hr class="divider">
+      <div class="eyebrow">The close</div>
+      <p style="font-size:14px;margin:4px 0">"Keep the maps side by side — working session with whoever's closest to talent on the portfolio side, or another round first?"</p>
+    </div>
+  </div>
+  <div class="card sec">
+    <div class="eyebrow">Live notes — saved locally as you type</div>
+    <textarea id="liveNotes" style="min-height:130px" placeholder="What he says about portfolio talent constraints · names he mentions · anything he promises · what he reacts to…"></textarea>
+  </div>
+</section>
+
+<!-- ============ THE ROOM ============ -->
+<section id="v-room" hidden>
+  <div class="sec"><h2 style="font-size:22px">Who's actually across the table</h2>
+  <p class="lede">One person on the call, three people in the room. Bryant reports up into a firm run by Cheryl Mills — everything you say should survive being repeated to her verbatim.</p></div>
+
+  <div class="grid g3 sec">
+    <div class="card">
+      <div class="eyebrow">On the call</div>
+      <h3 style="font-size:17px">Bryant Welters</h3>
+      <p style="font-size:13.5px;margin:6px 0 0">VP External Affairs. At BlackIvy since 2013 — Analyst → Senior Analyst → Associate → VP. Before that: marketing analyst, New England Patriots. <strong>Tony's son.</strong></p>
+      <p class="note" style="margin-top:8px">He grew up inside this firm. Respect the ladder he climbed — don't treat him as a message-passer to his father.</p>
+    </div>
+    <div class="card">
+      <div class="eyebrow">Runs the firm</div>
+      <h3 style="font-size:17px">Cheryl Mills — CEO</h3>
+      <p style="font-size:13.5px;margin:6px 0 0">Former chief of staff to Secretary Clinton; Counselor to the State Department; ex-NYU senior counsel. Development-economics literate at the highest level.</p>
+      <p class="note" style="margin-top:8px">⚠️ Tony is <strong>Executive Chairman</strong>, not CEO. Never pitch the firm as if Tony runs it day to day.</p>
+    </div>
+    <div class="card">
+      <div class="eyebrow">The chairman</div>
+      <h3 style="font-size:17px">Tony Welters</h3>
+      <p style="font-size:13.5px;margin:6px 0 0">Founded AmeriChoice → UnitedHealth EVP ~20 yrs. CINQCARE founder, Somatus chairman. Boards: Carlyle, Gilead, Loews; NYU Law board chair. AnBryce Foundation with Beatrice — full scholarships for first-generation professional students.</p>
+      <p class="note" style="margin-top:8px">Harlem-born; his mother died of a medical error when he was 8. Health equity is personal. <strong>AnBryce ↔ first-gen education = your verbal-only bridge.</strong></p>
+    </div>
+  </div>
+
+  <div class="card sec">
+    <div class="eyebrow">The connector — thank her, protect her</div>
+    <p style="margin:4px 0"><strong style="color:var(--ink)">Jessica Gamzon</strong> — President, Network Solutions, CINQCARE. Dr. Silber reintroduced you; she remembered you from a black-tie NYC event ~4 years back. She made this intro after Plan A (BlackIvy chief of staff) stalled — she spent capital on you. Credit her warmly on the call and cc her on the follow-up. <strong>Separately:</strong> she's connecting you to CINQCARE's Head of Talent Acquisition — that's a different thread; don't merge them on this call.</p>
+  </div>
+
+  <div class="card sec">
+    <div class="eyebrow">The firm</div>
+    <p style="margin:4px 0">Founded 2014 · HQ Washington DC · offices <strong>Accra, Nairobi, Dar es Salaam</strong> · "Endeavors That Matter." Builds, operates, and scales essential-sector businesses: food, housing, healthcare, warehousing, logistics. <strong>Their three markets — Ghana, Kenya, Tanzania — overlap yours in two, with Ghana next on your map.</strong></p>
+    <div style="overflow-x:auto;margin-top:10px"><table>
+      <thead><tr><th>Portfolio company</th><th>Sector</th><th>What it needs that you supply</th></tr></thead>
+      <tbody>
+        <tr><td class="who">LuccaHealth</td><td>Healthcare facilities</td><td>Trained clinical + community health workers; patient trust and uptake; Dr. Griffith's LMIC telemedicine model</td></tr>
+        <tr><td class="who">BigCold</td><td>Cold chain</td><td rowspan="3">Technicians, operators, supervisors, managers at local cost; AI-native training that scales at near-zero marginal cost</td></tr>
+        <tr><td class="who">SimpliFine</td><td>Food</td></tr>
+        <tr><td class="who">WestPark</td><td>Warehousing / logistics</td></tr>
+        <tr><td class="who">IndigoHomes</td><td>Housing</td><td>Communities with income, health, and stability — the full-spectrum coalition model</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+
+  <div class="card sec">
+    <div class="eyebrow">How this firm thinks — read before the call</div>
+    <p style="margin:4px 0"><strong style="color:var(--ink)">"Africa Today: From Lions to Unicorns"</strong> — BlackIvy's own thesis piece and webinar. Panel: Cheryl Mills, Tony Welters, <strong>Paul Collier</strong> (Oxford, <em>The Bottom Billion</em>), Jean-Louis Warnholz; moderated by Troy Carter. It's exactly how they frame the continent.</p>
+    <p style="margin:8px 0 0">What that means for you: this leadership will <em>immediately</em> understand the trust-and-adoption argument — it's the classic constraint on essential-sector businesses in frontier markets. <strong>Lead there. Never lead with a program list.</strong></p>
+    <p class="note" style="margin-top:8px">(The BVI "African Lions Fund" is unrelated — not theirs. Don't conflate.)</p>
+  </div>
+</section>
+
+<!-- ============ GAME PLAN ============ -->
+<section id="v-plan" hidden>
+  <div class="sec"><h2 style="font-size:22px">The arc of the call</h2>
+  <p class="lede">Roughly 40 minutes. The ratio that wins: listen more than you talk. Bryant asked to learn about IHA — but what makes him an advocate inside the firm is feeling heard about what <em>they're</em> building.</p></div>
+
+  <div class="sec">
+    <details class="scr" open><summary><span class="pill nv">1</span> Open — 2 minutes</summary><div class="body">
+      <p>Thank him for the time; credit Jessica warmly. Restate the no-ask posture from the cover email in one breath:</p>
+      <div class="quote">"I meant what I wrote — I'm not coming with an ask. I'd like to understand what you're building and see whether our maps overlap."</div>
+      <p class="note">Then hand him the floor first if he'll take it. If he says "tell me about IHA" — that's your opener drill. 90 seconds, then back to him.</p>
+    </div></details>
+
+    <details class="scr"><summary><span class="pill nv">2</span> His turn — get him talking (10–15 min)</summary><div class="body">
+      <p>Questions that show you did the reading and give you the overlap material:</p>
+      <ul>
+        <li>"What does External Affairs own at BlackIvy — where do you sit between the portfolio and the outside world?"</li>
+        <li>"Where do the portfolio companies feel talent constraints most — clinical, technical, managerial?"</li>
+        <li>"When you stand up something like LuccaHealth or BigCold in a new community, how do you approach local adoption and trust?"</li>
+        <li>"What does the next 18 months look like across Accra, Nairobi, Dar?"</li>
+        <li>"I read the Lions to Unicorns conversation — is that still how the firm frames the moment?" <span class="note">(signals homework, invites thesis talk)</span></li>
+      </ul>
+      <p class="note">Every answer he gives is a hook for your overlap map in part 4. Take notes visibly.</p>
+    </div></details>
+
+    <details class="scr"><summary><span class="pill nv">3</span> Your turn — the story in 3 moves (10 min)</summary><div class="body">
+      <p><strong>Move 1 — the institution and the engine.</strong> 501(c)(3) platform institution, Aspen/Brookings model, with the Perpetual Engine underneath: Educate → Deploy → Capitalize → Scale. Three kinds of capital, one structure. "This isn't charity. It's architecture."</p>
+      <p><strong>Move 2 — Kenya, because you ran it.</strong> The numbers, delivered cold (drill tab). Five-partner coalition, UNDP included. Left IHA Advance in-country. "Not a study. A deployment."</p>
+      <p><strong>Move 3 — the part that can't be manufactured.</strong> The 350+ pastors and leaders. The network was already there — its leaders invited TPC in to steward the work. "A network you build takes years; a network that invites you in is standing trust, already earned." Then the thesis: in these markets the binding constraint is rarely capital or product — it's trust and last-mile adoption.</p>
+      <p class="note">If it lands, he'll make the connection to their portfolio himself. Let him say it first if he's close.</p>
+    </div></details>
+
+    <details class="scr"><summary><span class="pill nv">4</span> Map the overlap — together (10 min)</summary><div class="body">
+      <p>Walk the portfolio table (Room tab) conversationally, anchored to whatever he said in part 2. The frame:</p>
+      <div class="quote">"Trained talent and community trust de-risk an operating business. That's not philanthropy adjacent to your portfolio — it's an input to it. And it doesn't have to be an expense — this is the kind of work that can be structured as a jointly built asset."</div>
+      <p>Only if he asks "what could this look like" — the three shapes, as <em>shapes</em>, not a menu: <strong>pilot</strong> (health + workforce around one venture; Kenya natural first) · <strong>co-build</strong> (a jointly created workforce company — an asset, not an expense) · <strong>co-invest</strong> (later, alongside capital partners and DeepFutures, in formation).</p>
+    </div></details>
+
+    <details class="scr"><summary><span class="pill nv">5</span> Close — 2 minutes, no ask</summary><div class="body">
+      <div class="quote">"This confirmed what I hoped — we're working the same countries from different layers of the stack. I'd love to keep the maps side by side. What would be useful on your end — a working session with whoever's closest to talent on the portfolio side, or should the two of us go another round first?"</div>
+      <p class="note">A next step with a name and a date beats any amount of enthusiasm. If he offers to "share it internally," offer to tailor one page for whoever he's sharing it with — that creates the second touch.</p>
+    </div></details>
+  </div>
+</section>
+
+<!-- ============ FLASHCARDS ============ -->
+<section id="v-cards" hidden>
+  <div class="sec"><h2 style="font-size:22px">Flashcards</h2>
+  <p class="lede">Tap to flip. Grade yourself honestly — "Again" resurfaces a card sooner, "Easy" retires it longer. Mastery = graded Easy twice.</p></div>
+  <div class="deckbar" id="deckbar"></div>
+  <div class="fc" id="fcWrap" tabindex="0" role="button" aria-label="Flashcard — click or press Space to flip">
+    <div class="fcin"><div class="face front"><div class="deckl" id="fcDeck"></div><div class="q" id="fcQ"></div><p class="note">click / space to flip</p></div>
+    <div class="face back"><div class="deckl">Answer</div><div class="a" id="fcA"></div></div></div>
+  </div>
+  <div class="btnrow" style="justify-content:center;margin-top:16px">
+    <button class="btn ghost" id="gAgain">Again</button>
+    <button class="btn ghost" id="gGood">Good</button>
+    <button class="btn primary" id="gEasy">Easy</button>
+  </div>
+  <p class="note" style="text-align:center;margin-top:10px" id="fcMeta"></p>
+</section>
+
+<!-- ============ OPENER DRILL ============ -->
+<section id="v-opener" hidden>
+  <div class="sec"><h2 style="font-size:22px">The 90-second answer to "tell me about IHA"</h2>
+  <p class="lede">This is the question the whole meeting exists to answer. Hit Start and deliver it out loud — beats light up as you land them. Six of six inside 90 seconds is a pass; three consecutive passes before 11 AM is the bar.</p></div>
+  <div class="card sec">
+    <div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
+      <svg class="ring" viewBox="0 0 74 74" aria-hidden="true"><circle class="bgc" cx="37" cy="37" r="31"/><circle class="fgc" id="ringFg" cx="37" cy="37" r="31" transform="rotate(-90 37 37)"/><text x="37" y="43" text-anchor="middle" id="ringT">90</text></svg>
+      <div class="btnrow">
+        <button class="btn primary" id="opStart">Start drill</button>
+        <button class="btn ghost" id="opStop" disabled>Stop</button>
+        <span class="voice-note" id="opVoiceNote"></span>
+      </div>
+    </div>
+    <div class="beats" id="opBeats" style="margin-top:16px"></div>
+    <div class="transcript" id="opTx" aria-live="polite">Your words appear here as you speak. No microphone? Type your opener below instead.</div>
+    <textarea id="opType" placeholder="…or type your opener here and hit Score." style="margin-top:10px"></textarea>
+    <div class="btnrow" style="margin-top:10px">
+      <button class="btn ghost" id="opScoreTyped">Score typed answer</button>
+      <span id="opResult"></span>
+    </div>
+    <div class="mini-hist" id="opHist" title="Recent scores"></div>
+  </div>
+  <details class="scr" style="margin-top:16px"><summary>Reveal the reference opener</summary><div class="body"><div class="quote">"IHA is a 501(c)(3) platform institution — built the way Aspen or Brookings is built, but with an engine underneath it: Educate, Deploy, Capitalize, Scale. We train people, deploy them into real careers and into ventures our studio builds, partner to capitalize those ventures, and the studio's revenue funds the next cycle. It isn't charity — it's architecture.
+
+This spring we stopped describing it and ran it. Fourteen days, three Kenyan cities — Nairobi, Kakamega, Mombasa. 2,500+ people served. About 1,000 at a revival and leadership training. Roughly 400 at a business conference at the University of Nairobi. 350+ pastors and leaders and 50+ organizations partnered, with UNDP in the coalition. And we left a free AI learning platform in-country that partners still use.
+
+The part that can't be manufactured: those 350+ leaders are a standing network that was already there — its leaders invited our ministry partner in to steward the work. A network you build takes years; a network that invites you in is trust already earned. In these markets, that's the binding constraint — not capital, not product. Trust and last-mile adoption.
+
+Ghana is next, summer 2027 — which puts us in two of your three markets. Same countries, same conviction, different layers of one stack."</div></div></details>
+</section>
+
+<!-- ============ Q&A ROULETTE ============ -->
+<section id="v-qa" hidden>
+  <div class="sec"><h2 style="font-size:22px">Q&amp;A roulette</h2>
+  <p class="lede">Bryant throws you a likely question — out loud if your speakers are on. Answer by voice or text. You're scored on the beats a strong answer must contain, red-flagged if you step on a landmine, then shown the model response.</p></div>
+  <div class="card sec">
+    <div class="btnrow">
+      <button class="btn primary" id="qaDraw">Throw me one</button>
+      <button class="btn ghost" id="qaSpeak" disabled>Hear it again</button>
+      <span class="voice-note" id="qaVoiceNote"></span>
+    </div>
+    <div id="qaQ" style="margin-top:14px;font-size:17px;font-family:var(--heading);font-weight:600;color:var(--ink)"></div>
+    <div id="qaAnswerZone" hidden>
+      <div class="btnrow" style="margin-top:12px">
+        <button class="btn ghost" id="qaMic">🎙 Answer by voice</button>
+        <button class="btn ghost" id="qaMicStop" disabled>Stop</button>
+      </div>
+      <div class="transcript" id="qaTx" style="margin-top:10px">Speak your answer, or type below.</div>
+      <textarea id="qaType" placeholder="…or type your answer here." style="margin-top:10px"></textarea>
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn primary" id="qaScore">Score my answer</button>
+        <span id="qaResult"></span>
+      </div>
+      <div class="beats" id="qaBeats"></div>
+      <div id="qaModel" hidden><hr class="divider"><div class="eyebrow">Model answer</div><div class="quote" id="qaModelText"></div><p class="note" id="qaTrapNote"></p></div>
+    </div>
+    <p class="note" style="margin-top:12px" id="qaMastery"></p>
+  </div>
+</section>
+
+<!-- ============ ROLEPLAY ============ -->
+<section id="v-rp" hidden>
+  <div class="sec"><h2 style="font-size:22px">Roleplay: the call itself</h2>
+  <p class="lede">Bryant Welters — professional, curious, protective of the firm, and better-briefed than you expect. He reacts to what you actually say: hit the beats and the room warms; step on a landmine and it cools fast. Get to the end with the working session offered.</p></div>
+  <div class="card sec">
+    <div class="chat" id="rpChat"></div>
+    <div id="rpInputZone" style="margin-top:12px">
+      <div class="btnrow">
+        <button class="btn ghost" id="rpMic">🎙 Speak</button>
+        <button class="btn ghost" id="rpMicStop" disabled>Stop</button>
+        <span class="voice-note" id="rpVoiceNote"></span>
+      </div>
+      <textarea id="rpType" placeholder="Your response to Bryant…" style="margin-top:10px"></textarea>
+      <div class="btnrow" style="margin-top:10px">
+        <button class="btn primary" id="rpSend">Send</button>
+        <button class="btn ghost" id="rpReset">Start over</button>
+        <label class="voice-note" style="margin-left:auto"><input type="checkbox" id="rpTts" checked> Bryant speaks aloud</label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LANDMINES ============ -->
+<section id="v-mines" hidden>
+  <div class="sec"><h2 style="font-size:22px">Landmines — the do-not-say list</h2>
+  <p class="lede">Every one of these is a call you (or the vault rules) already made. Read once tonight, once before the call. Each card: the mine, why it detonates, and what to say instead.</p></div>
+  <div class="sec" id="mineList"></div>
+</section>
+
+<!-- ============ FOLLOW-UP ============ -->
+<section id="v-follow" hidden>
+  <div class="sec"><h2 style="font-size:22px">After the call</h2>
+  <p class="lede">The meeting isn't over when the call ends — it's over when the follow-up lands. Same-day, while you're still fresh in his inbox memory.</p></div>
+
+  <div class="card sec">
+    <div class="eyebrow">Within 3 hours — the follow-up email (cc Jessica)</div>
+    <div class="quote">Subject: Thank you — and the page I promised
+
+Bryant,
+
+Thank you for the time this morning — and Jessica, again, for the connection.
+
+The through-line I took from our conversation: [HIS WORDS — the constraint or priority he named, quoted back to him].
+
+As promised, here's [the tailored one-pager / the brief again / the specific thing you offered]. And on the next step we discussed — [the working session / the internal share] — I'm glad to work around your team's calendar; [propose two windows].
+
+Same countries, same conviction. Looking forward to building the map.
+
+Lorenzo</div>
+    <p class="note">Fill the brackets from your Call Mode notes. If no next step was agreed, the ask is exactly one sentence: "What would be most useful as a next step on your end?"</p>
+  </div>
+
+  <div class="grid g2 sec">
+    <div class="card">
+      <div class="eyebrow">Also same day</div>
+      <ul style="padding-left:18px;margin:6px 0;font-size:14px">
+        <li><strong>Separate note to Jessica</strong> — two lines, gratitude + one concrete thing that landed. She spent relationship capital; close her loop.</li>
+        <li><strong>Log the call</strong> — who he named internally, portfolio pain points, temperature, promised items. That's the input for the tailored one-pager.</li>
+        <li><strong>If he offered to share internally</strong> — send the one page tailored to the named recipient within 48h. That's the second touch.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="eyebrow">The cadence if it goes quiet</div>
+      <ul style="padding-left:18px;margin:6px 0;font-size:14px">
+        <li><strong>Day 5–6:</strong> one light nudge — lead with something useful to <em>them</em> (a Kenya artifact, a workforce data point), not a "checking in."</li>
+        <li><strong>Week 3:</strong> route through Jessica for a temperature read rather than emailing Bryant again.</li>
+        <li><strong>Never:</strong> the honoree ask, event invitations, or money — those doors open by phone, later, with Silber's read.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SCRIPTS ============ -->
+<section id="v-scripts" hidden>
+  <div class="sec"><h2 style="font-size:22px">Scripts &amp; lines</h2>
+  <p class="lede">The exact language from the brief and cover email, plus the verbal-only material that never goes in writing.</p></div>
+  <div class="sec" id="scriptList"></div>
+</section>
+
+</main>
+
+<script>
+"use strict";
+/* ---------- state ---------- */
+const LS="biMeetingGym.v1";
+const store=(()=>{try{return JSON.parse(localStorage.getItem(LS))||{}}catch(e){return{}}})();
+store.cards=store.cards||{}; store.opHist=store.opHist||[]; store.qaStats=store.qaStats||{};
+store.workout=store.workout||{}; store.rpBest=store.rpBest??null;
+function save(){try{localStorage.setItem(LS,JSON.stringify(store))}catch(e){}}
+function markDone(kind){store.workout[kind]=true;save();renderDash();}
+
+/* ---------- meeting countdown ---------- */
+const MEETING=new Date("2026-08-13T11:00:00-04:00").getTime();
+function renderCountdown(){
+  const el=document.getElementById("countdown");
+  const d=MEETING-Date.now();
+  if(d<=0){el.textContent="◆ It's game time.";return}
+  const h=Math.floor(d/36e5),m=Math.floor(d%36e5/6e4);
+  el.textContent=`◆ ${h}h ${String(m).padStart(2,"0")}m to the call`;
+}
+renderCountdown(); setInterval(renderCountdown,30000);
+
+/* ---------- tabs ---------- */
+const views=["dash","live","room","plan","cards","opener","qa","rp","mines","scripts","follow"];
+document.getElementById("tabs").addEventListener("click",e=>{
+  const b=e.target.closest(".tab"); if(!b)return;
+  document.querySelectorAll(".tab").forEach(t=>t.setAttribute("aria-selected",t===b?"true":"false"));
+  views.forEach(v=>document.getElementById("v-"+v).hidden=v!==b.dataset.v);
+  window.scrollTo({top:0});
+});
+
+/* ---------- text matching ---------- */
+function norm(s){return " "+s.toLowerCase().replace(/[’']/g,"'").replace(/[^a-z0-9'$ ]+/g," ").replace(/\s+/g," ")+" "}
+function hitAny(text,keys){const t=norm(text);return keys.some(k=>t.includes(norm(k).trim()?" "+k.toLowerCase()+" ":k.toLowerCase())||t.includes(k.toLowerCase()))}
+
+/* ---------- dashboard ---------- */
+const KENYA=[
+  {t:"2,500+ people served",d:"3 cities · Nairobi, Kakamega, Mombasa · 14 days, Apr 23 – May 6"},
+  {t:"~1,000 at the revival + leaders training",d:"the largest single gathering of the mission"},
+  {t:"~400 at the business conference",d:"entrepreneurs, owners, students — University of Nairobi"},
+  {t:"350+ pastors and leaders partnered",d:"THE network — one number, not two"},
+  {t:"50+ organizations partnered",d:"five-partner coalition incl. UNDP"},
+  {t:"Ghana — summer 2027",d:"educational-exchange beachhead, full delegation → two of BlackIvy's three markets"}
+];
+document.getElementById("fiveNumbers").innerHTML=KENYA.map(b=>`<div class="beat"><div class="bx" style="background:var(--pine);border-color:var(--pine)">✓</div><div><span class="bt">${b.t}</span> <span class="bd">— ${b.d}</span></div></div>`).join("");
+
+const CIRCUIT=[
+  {k:"read",t:"Read The Room + Landmines tabs once",click:true},
+  {k:"lions",t:'Skim BlackIvy\'s "Africa Today: From Lions to Unicorns" — their framing, their words',click:true},
+  {k:"cards",t:"Flashcards: run the Kenya Numbers and Landmines decks to mastery"},
+  {k:"opener",t:"Opener drill: three consecutive 6/6 passes, out loud"},
+  {k:"qa",t:"Q&A roulette: five draws scored 100%"},
+  {k:"rp",t:"One full roleplay run ending with the working session offered"}
+];
+function renderDash(){
+  document.getElementById("workout").innerHTML=CIRCUIT.map(c=>{
+    const done=store.workout[c.k];
+    return `<li ${c.click?`style="cursor:pointer" data-k="${c.k}"`:""}>${done?'<span class="done-x">✓</span> ':""}${c.t}${c.click&&!done?' <span class="note">(click when done)</span>':""}</li>`;
+  }).join("");
+  document.getElementById("workout").querySelectorAll("[data-k]").forEach(li=>li.addEventListener("click",()=>markDone(li.dataset.k)));
+  const passes=store.opHist.filter(s=>s>=6).length;
+  const qaDone=Object.values(store.qaStats).filter(v=>v.perfect).length;
+  const mastered=Object.values(store.cards).filter(c=>c.easy>=2).length;
+  document.getElementById("statTiles").innerHTML=[
+    {l:"Opener passes",v:passes,s:"6/6 runs · bar = 3 in a row"},
+    {l:"Questions nailed",v:qaDone+" / "+QA.length,s:"scored 100% at least once"},
+    {l:"Cards mastered",v:mastered+" / "+CARDS.length,s:"graded Easy twice"},
+    {l:"Best roleplay",v:store.rpBest===null?"—":store.rpBest+"%",s:"beats hit across the call"}
+  ].map(t=>`<div class="tile"><div class="lab">${t.l}</div><div class="val">${t.v}</div><div class="sub">${t.s}</div></div>`).join("");
+}
+
+/* ---------- flashcards ---------- */
+const CARDS=[
+  /* Kenya Numbers */
+  {d:"Kenya Numbers",q:"How many people served, where, over how long?",a:"2,500+ served · Nairobi, Kakamega, Mombasa · 14 days, April 23 – May 6, 2026."},
+  {d:"Kenya Numbers",q:"How many at the revival + pastors/leaders training?",a:"About 1,000."},
+  {d:"Kenya Numbers",q:"The business conference — how many, who, where?",a:"Roughly 400 — entrepreneurs, business owners, students — hosted at the University of Nairobi. Entrepreneur trainings ran in every city visited."},
+  {d:"Kenya Numbers",q:"How many pastors/leaders and organizations partnered?",a:"350+ pastors and leaders, 50+ organizations. ⚠️ The 350+ ARE the network — there is no separate '400+ faith leaders' figure."},
+  {d:"Kenya Numbers",q:"What did IHA leave in-country?",a:"IHA Advance — free AI-native training platform, 25 modules, deployed across three Kenyan communities. Partners still use it."},
+  {d:"Kenya Numbers",q:"What's next after Kenya, and when?",a:"Ghana, summer 2027 — entering through an educational-exchange beachhead with the full delegation traveling. That puts IHA in two of BlackIvy's three markets."},
+  {d:"Kenya Numbers",q:"How do you characterize the delegation?",a:"Intergenerational, carrying experts in every field we work in — healthcare, education, enterprise, ministry, run simultaneously. 'Not a study. A deployment.'"},
+  /* BlackIvy Facts */
+  {d:"BlackIvy Facts",q:"Who is BlackIvy's CEO?",a:"Cheryl Mills — former chief of staff to Secretary Clinton, Counselor to the State Department, ex-NYU senior counsel. Tony Welters is Executive Chairman, NOT CEO."},
+  {d:"BlackIvy Facts",q:"Bryant Welters — role and history?",a:"VP External Affairs. At the firm since 2013: Analyst → Senior Analyst → Associate → VP. Before that, marketing analyst for the New England Patriots. Tony's son."},
+  {d:"BlackIvy Facts",q:"BlackIvy — founded when, offices where?",a:"Founded 2014. HQ Washington DC; offices in Accra, Nairobi, Dar es Salaam. Tagline: 'Endeavors That Matter.'"},
+  {d:"BlackIvy Facts",q:"Name the five portfolio companies.",a:"IndigoHomes (housing) · LuccaHealth (healthcare) · BigCold (cold chain) · SimpliFine (food) · WestPark (warehousing/logistics)."},
+  {d:"BlackIvy Facts",q:"What's their thesis piece, and who was on the panel?",a:"'Africa Today: From Lions to Unicorns' — Cheryl Mills, Tony Welters, Paul Collier (Oxford, The Bottom Billion), Jean-Louis Warnholz; moderated by Troy Carter."},
+  {d:"BlackIvy Facts",q:"Tony Welters — the two facts that matter tomorrow?",a:"(1) His philanthropy is AnBryce — full scholarships for first-generation professional students → natural verbal bridge to the Academy thesis. (2) Harlem-born; mother died of a medical error — health is personal. Both VERBAL ONLY."},
+  /* Positioning */
+  {d:"Positioning",q:"The one-liner.",a:"'BlackIvy builds the hard infrastructure of African growth. We build the human infrastructure — trained talent and standing community trust — in the same markets. Same countries, same conviction, different layers of one stack.'"},
+  {d:"Positioning",q:"The engine, in four words.",a:"Educate → Deploy → Capitalize → Scale. Deploy = government-contracted careers AND ventures the studio builds. Capitalize = we PARTNER to capitalize. 'This isn't charity. It's architecture.'"},
+  {d:"Positioning",q:"The three kinds of capital.",a:"Philanthropic (IHA 501c3) · Development (coalition incl. UNDP) · Investment (Perpetual Core, capital partners, DeepFutures — in formation). One institution routes all three at the same target."},
+  {d:"Positioning",q:"The trust-layer line — say it verbatim.",a:"'A network you build takes years. A network that invites you in is standing trust, already earned. In these markets the binding constraint is rarely capital or product — it's trust and last-mile adoption.'"},
+  {d:"Positioning",q:"What has the studio produced?",a:"Uzima City (uzima.theiha.org — city-scale development platform) · Kept Count (keptcount.com — care-ops evidence infrastructure) · IHA Advance (free AI training left in Kenya). Proof the architecture runs — NOT an investment menu."},
+  {d:"Positioning",q:"Who's on the team (as pitched)?",a:"Lorenzo (Founder) · Dr. Michele Y. Griffith, MD — CMO, 18+ yrs telemedicine across LMICs, WHO-level engagement · Dr. Steve Silber, DO/Harvard MHCM — 30+ yrs hospital systems · legal and angel-investment leadership in-house."},
+  /* Landmines deck */
+  {d:"Landmines",q:"Bryant asks: 'Where does your investment vehicle stand?'",a:"DeepFutures is IN FORMATION — purpose real, entity not yet. No dollar target, ever. 'We partner to capitalize; we don't assume we fund it alone.'"},
+  {d:"Landmines",q:"Should you ask BlackIvy for a donation or DeepFutures capital?",a:"NO — neither. No grantmaking arm exists; the philanthropy is Tony personally via AnBryce (later door). The realistic near-term money is COMMERCIAL: a workforce/health pilot around a portfolio company. And even that, they open."},
+  {d:"Landmines",q:"Tanzania comes up. What's your line?",a:"It's THEIR market, not an IHA claim. If maps align it's joint-expansion upside. Never 'Tanzania is yours' phrasing — Lorenzo cut it."},
+  {d:"Landmines",q:"October / Ascent 2026?",a:"NOT happening. Removed from the brief and cover email. Never mention it."},
+  {d:"Landmines",q:"CINQCARE on this call?",a:"Don't raise CINQCARE business, and never claim a CINQCARE partnership — student placement is in discussions, not locked."},
+  {d:"Landmines",q:"UN-Africa / AU contacts — how do you refer to them?",a:"'Dialogue at the most senior level of UN-Africa leadership, and with the African Union's highest office.' Names verbally only, in the room, if directly relevant."},
+  {d:"Landmines",q:"Who built the Kenya faith network?",a:"NOBODY on our side — it already existed, established in its communities. Its leaders asked TPC Ministries to help steward the work. Never say 'built through TPC.'"},
+  {d:"Landmines",q:"Jobs numbers for Kenya?",a:"Never cite '20,000 jobs in two years' or '100,000 jobs per county' — deliberately omitted; they won't survive PE diligence next to the verified numbers."}
+];
+const DECKS=[...new Set(CARDS.map(c=>c.d))];
+let deckFilter=DECKS[0], fcIdx=0, flipped=false;
+function deckCards(){return CARDS.map((c,i)=>({...c,i})).filter(c=>c.d===deckFilter)}
+function cardState(i){return store.cards[i]||(store.cards[i]={easy:0,due:0})}
+function pickCard(){
+  const cs=deckCards(); if(!cs.length)return null;
+  const now=Date.now();
+  const due=cs.filter(c=>cardState(c.i).due<=now&&cardState(c.i).easy<2);
+  const pool=due.length?due:cs;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+let current=null;
+function showCard(){
+  current=pickCard(); flipped=false;
+  document.getElementById("fcWrap").classList.remove("flip");
+  if(!current)return;
+  document.getElementById("fcDeck").textContent=current.d;
+  document.getElementById("fcQ").textContent=current.q;
+  document.getElementById("fcA").textContent=current.a;
+  const cs=deckCards(), m=cs.filter(c=>cardState(c.i).easy>=2).length;
+  document.getElementById("fcMeta").textContent=`${deckFilter}: ${m} of ${cs.length} mastered`;
+}
+document.getElementById("deckbar").innerHTML=DECKS.map(d=>`<button class="deckbtn${d===deckFilter?" on":""}" data-d="${d}">${d}</button>`).join("");
+document.getElementById("deckbar").addEventListener("click",e=>{
+  const b=e.target.closest(".deckbtn"); if(!b)return; deckFilter=b.dataset.d;
+  document.querySelectorAll(".deckbtn").forEach(x=>x.classList.toggle("on",x===b)); showCard();
+});
+const fcW=document.getElementById("fcWrap");
+function flip(){flipped=!flipped;fcW.classList.toggle("flip",flipped)}
+fcW.addEventListener("click",flip);
+fcW.addEventListener("keydown",e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();flip()}});
+function grade(kind){
+  if(!current)return;
+  const st=cardState(current.i), now=Date.now();
+  if(kind==="again"){st.easy=0;st.due=now+30e3}
+  if(kind==="good"){st.due=now+3*6e4}
+  if(kind==="easy"){st.easy++;st.due=now+15*6e4}
+  save(); checkDeckMastery(); showCard(); renderDash();
+}
+function checkDeckMastery(){
+  const need=CARDS.map((c,i)=>({d:c.d,i})).filter(c=>c.d==="Kenya Numbers"||c.d==="Landmines");
+  if(need.every(c=>cardState(c.i).easy>=2))markDone("cards");
+}
+document.getElementById("gAgain").onclick=()=>grade("again");
+document.getElementById("gGood").onclick=()=>grade("good");
+document.getElementById("gEasy").onclick=()=>grade("easy");
+showCard();
+
+/* ---------- speech helpers ---------- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function makeMic(txEl,noteEl,onText){
+  if(!SR){if(noteEl)noteEl.textContent="No speech recognition in this browser — type instead.";return null}
+  const r=new SR(); r.continuous=true; r.interimResults=true; r.lang="en-US";
+  let finalText="";
+  r.onresult=e=>{
+    let interim="";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      const t=e.results[i][0].transcript;
+      if(e.results[i].isFinal)finalText+=t+" "; else interim+=t;
+    }
+    txEl.innerHTML=finalText+' <span class="interim">'+interim+"</span>";
+    onText(finalText+" "+interim);
+  };
+  r.onerror=()=>{txEl.classList.remove("live")};
+  return {start(){finalText="";txEl.textContent="";txEl.classList.add("live");try{r.start()}catch(e){}},
+          stop(){txEl.classList.remove("live");try{r.stop()}catch(e){}},
+          text:()=>finalText};
+}
+function speak(text,cb){
+  if(!window.speechSynthesis){if(cb)cb();return}
+  const u=new SpeechSynthesisUtterance(text); u.rate=1.02; u.onend=cb||null;
+  speechSynthesis.cancel(); speechSynthesis.speak(u);
+}
+
+/* ---------- opener drill ---------- */
+const OP_BEATS=[
+  {t:"Institution + engine",d:"501(c)(3) platform institution · Educate → Deploy → Capitalize → Scale · 'architecture'",k:["institution","engine","educate","capitalize","architecture","aspen","brookings","501"]},
+  {t:"Three kinds of capital",d:"philanthropic · development · investment — one structure",k:["philanthropic","development capital","investment","three kinds","three types of capital"]},
+  {t:"Kenya, with numbers",d:"2,500+ · 3 cities · 14 days · ~1,000 revival · ~400 conference",k:["2500","2,500","twenty five hundred","kenya","nairobi","fourteen days","14 days","kakamega","mombasa","university of nairobi"]},
+  {t:"The trust layer, invited in",d:"350+ pastors ARE the network · it already existed · leaders invited TPC to steward",k:["350","invited","already there","already existed","standing trust","pastors","trust"]},
+  {t:"The binding constraint",d:"not capital, not product — trust and last-mile adoption",k:["binding constraint","last mile","last-mile","adoption","not capital"]},
+  {t:"Two of three markets, as peers",d:"Ghana summer 2027 · 'different layers of one stack' — no dependency framing",k:["ghana","2027","two of your three","layers of one stack","same countries","different layers"]}
+];
+let opTimer=null,opLeft=90,opMic=null,opText="";
+const CIRC=2*Math.PI*31;
+document.getElementById("ringFg").style.strokeDasharray=CIRC;
+function ringSet(sec){document.getElementById("ringT").textContent=sec;document.getElementById("ringFg").style.strokeDashoffset=CIRC*(1-sec/90)}
+ringSet(90);
+function renderOpBeats(text){
+  document.getElementById("opBeats").innerHTML=OP_BEATS.map(b=>{
+    const hit=text&&hitAny(text,b.k);
+    return `<div class="beat${hit?" hit":""}"><div class="bx">${hit?"✓":""}</div><div><span class="bt">${b.t}</span> <span class="bd">— ${b.d}</span></div></div>`;
+  }).join("");
+}
+renderOpBeats("");
+function opFinish(){
+  clearInterval(opTimer);opTimer=null;
+  if(opMic)opMic.stop();
+  document.getElementById("opStart").disabled=false;document.getElementById("opStop").disabled=true;
+  const score=OP_BEATS.filter(b=>hitAny(opText,b.k)).length;
+  store.opHist.push(score); if(store.opHist.length>12)store.opHist.shift(); save();
+  const last3=store.opHist.slice(-3);
+  if(last3.length===3&&last3.every(s=>s>=6))markDone("opener");
+  document.getElementById("opResult").innerHTML=score>=6?`<span class="pill good">PASS — ${score}/6</span>`:`<span class="pill warn">${score}/6 — go again</span>`;
+  renderOpHist(); renderDash();
+}
+function renderOpHist(){
+  document.getElementById("opHist").innerHTML=store.opHist.map(s=>`<div style="height:${6+s/6*30}px;opacity:${s>=6?1:.5}" title="${s}/6"></div>`).join("");
+}
+renderOpHist();
+document.getElementById("opStart").onclick=()=>{
+  opText=""; opLeft=90; ringSet(90); renderOpBeats(""); document.getElementById("opResult").textContent="";
+  document.getElementById("opStart").disabled=true; document.getElementById("opStop").disabled=false;
+  opMic=makeMic(document.getElementById("opTx"),document.getElementById("opVoiceNote"),t=>{opText=t;renderOpBeats(t)});
+  if(opMic)opMic.start(); else document.getElementById("opTx").textContent="Type below while the clock runs, then Stop.";
+  opTimer=setInterval(()=>{opLeft--;ringSet(Math.max(0,opLeft));
+    if(!opMic){opText=document.getElementById("opType").value;renderOpBeats(opText)}
+    if(opLeft<=0)opFinish()},1000);
+};
+document.getElementById("opStop").onclick=()=>{if(!opMic)opText=document.getElementById("opType").value;opFinish()};
+document.getElementById("opScoreTyped").onclick=()=>{
+  opText=document.getElementById("opType").value; renderOpBeats(opText);
+  const score=OP_BEATS.filter(b=>hitAny(opText,b.k)).length;
+  store.opHist.push(score); if(store.opHist.length>12)store.opHist.shift(); save();
+  const last3=store.opHist.slice(-3);
+  if(last3.length===3&&last3.every(s=>s>=6))markDone("opener");
+  document.getElementById("opResult").innerHTML=score>=6?`<span class="pill good">PASS — ${score}/6</span>`:`<span class="pill warn">${score}/6 — go again</span>`;
+  renderOpHist(); renderDash();
+};
+
+/* ---------- Q&A roulette ---------- */
+const TRAPS=[
+  {k:["donation","donate","grant from","write a check","philanthropic support from you","fund deepfutures","anchor deepfutures","invest in deepfutures","capital for deepfutures"],t:"Asked BlackIvy for money",d:"No donation ask, no DeepFutures capital ask. The commercial pilot door is the one that's open — and they open it."},
+  {k:["we raised","we've raised","target of $","million dollar fund","fund of $"],t:"Put a number on DeepFutures",d:"DeepFutures is in formation. No dollar target, ever — an unraised target invites 'how much is closed?' from a Carlyle-board firm."},
+  {k:["tanzania is yours","our tanzania","we're in tanzania","tanzania presence"],t:"Claimed Tanzania",d:"Tanzania is their market. Joint-expansion upside only."},
+  {k:["ascent","october event","our conference","gala"],t:"Mentioned Ascent / October",d:"Ascent 2026 is off. It was removed from the brief and email — don't resurrect it."},
+  {k:["cinqcare partnership","partnered with cinqcare","cinqcare deal"],t:"Claimed a CINQCARE partnership",d:"In discussions ≠ locked. Never claim it."},
+  {k:["depends on us","relies on us","they need us","won't succeed without","can't succeed without"],t:"Dependency framing",d:"Posture rule: peers with complementary layers. Say what we bring; never claim their outcome hinges on it."},
+  {k:["20,000 jobs","100,000 jobs","20000 jobs","100000 jobs"],t:"Cited the jobs claims",d:"Deliberately omitted — won't survive PE diligence."},
+  {k:["built the network","we built a network","network we built","tpc built"],t:"Claimed you built the faith network",d:"It already existed. Its leaders invited TPC in — that's the stronger fact anyway."}
+];
+const QA=[
+  {q:"So how does all of this actually get funded?",
+   b:[{t:"Three capitals, one structure",k:["philanthropic","development","investment","three kinds","one structure","one institution"]},
+      {t:"Studio revenue funds the next cycle",k:["studio","revenue","perpetual core","next cohort","pays for the next","10%","ten percent"]},
+      {t:"DeepFutures honestly placed",k:["in formation","being formed","forming","partner to capitalize"]}],
+   m:"Three kinds of capital through one structure. Philanthropic through the 501(c)(3) — convening, curriculum, the demonstration work nobody underwrites commercially. Development capital through the coalition — UNDP was a partner in Kenya. And investment through Perpetual Core, our venture studio, alongside capital partners and DeepFutures, the vehicle now being formed. The studio's revenue funds the next cycle — ten percent of revenue goes back to community by design. Philanthropy proves the model, development capital scales it, investment makes it permanent.",
+   trap:"Never a dollar figure on DeepFutures. Never imply you fund it all alone."},
+  {q:"You mentioned an investment vehicle — where does that actually stand?",
+   b:[{t:"'In formation' — said plainly",k:["in formation","being formed","not yet formed","forming now"]},
+      {t:"Purpose is real",k:["purpose","capitalizes the work","vehicle that capitalizes"]},
+      {t:"Partner posture",k:["partner to capitalize","capital partners","don't assume we fund it alone","alongside"]}],
+   m:"Candidly: DeepFutures is in formation — the purpose is real, the entity is being stood up now. Its job is to capitalize the ventures and markets this work creates, and we're deliberate that we partner to capitalize — Perpetual Core, capital partners, and DeepFutures together. I'm not going to dress it up as further along than it is; a firm like yours would see through that in a sentence.",
+   trap:"The honesty IS the answer — a Carlyle-board firm respects 'in formation' and punishes inflation."},
+  {q:"Candidly — what are you hoping BlackIvy does with all this?",
+   b:[{t:"A conversation, full stop",k:["conversation","understand what you're building","no ask","not coming with an ask","learn"]},
+      {t:"Maps overlap",k:["maps overlap","same markets","same countries","where our maps"]},
+      {t:"Long-run partner frame",k:["long run","long-run","over time","partnership in the long"]}],
+   m:"Today? Nothing but this conversation. I want to understand what you're building and where our maps overlap — we're in the same countries, working different layers of the same stack. If the overlap is real, shapes will suggest themselves — a pilot around one venture, or something built jointly. But I'd rather earn that conclusion together than pitch it. I think BlackIvy is a long-run partner in this work, and long-run partnerships don't start with an ask.",
+   trap:"If he pushes ('come on, there's always an ask') — the three shapes as possibilities, pilot first. NEVER money."},
+  {q:"Walk me through Kenya — what actually happened on the ground?",
+   b:[{t:"The frame: ran the model",k:["ran it","stopped describing","deployment","not a study"]},
+      {t:"The numbers, cold",k:["2,500","2500","fourteen days","14 days","nairobi","kakamega","mombasa"]},
+      {t:"Conference + coalition",k:["university of nairobi","400","business conference","undp","coalition","50+"]},
+      {t:"Left something behind",k:["left","in-country","iha advance","still use","platform"]}],
+   m:"This spring we stopped describing the model and ran it. A five-partner coalition — UNDP included — deployed across Nairobi, Kakamega, and Mombasa for fourteen days. An intergenerational delegation carrying experts in every field we work in, running health, education, enterprise, and ministry tracks simultaneously. 2,500+ people served. About 1,000 at a revival and leadership training. Roughly 400 — entrepreneurs, owners, students — at a business conference at the University of Nairobi, with entrepreneur trainings in every city. 350+ pastors and leaders and 50+ organizations partnered. And we left a free AI learning platform in-country that partners still use. Not a study — a deployment.",
+   trap:"350+ pastors = the network. Don't double-count a '400+ faith network' — the ~400 is the conference."},
+  {q:"How is this different from an NGO running programs?",
+   b:[{t:"Programs end; engines compound",k:["programs end","grant ends","funding cycle","compound","engine"]},
+      {t:"The engine turns",k:["educate","deploy","capitalize","scale"]},
+      {t:"The line",k:["architecture","isn't charity","not charity"]}],
+   m:"Programs end when the grant ends — so the same communities get rebuilt and un-built every funding cycle. We built an institution with an engine underneath it: educate, deploy, capitalize, scale. People we train go into real careers and into ventures our studio builds; the ventures return revenue; revenue funds the next cohort. Each cycle pays for the next. This isn't charity — it's architecture.",
+   trap:null},
+  {q:"You mentioned a faith network — what is that, really?",
+   b:[{t:"It already existed",k:["already existed","already there","established","before we arrived"]},
+      {t:"Invited in",k:["invited","asked","steward","asked our ministry partner"]},
+      {t:"Why it matters",k:["trust","last-mile","last mile","adoption","binding constraint","cannot be manufactured","can't be manufactured","can't buy"]}],
+   m:"The 350+ leaders we convened are, at their core, pastors and church leaders — and the network isn't ours by construction. It was already there, established in its communities long before we arrived. Its leaders asked our ministry partner to help steward the work. That distinction is the whole point: a network you build takes years; a network that invites you in is standing trust, already earned. In these markets the binding constraint is rarely capital or product — it's trust and last-mile adoption. Anyone can buy media. Nobody can buy this.",
+   trap:"Never say TPC 'built' it — invited-in is both true and stronger."},
+  {q:"Are you doing anything in Tanzania?",
+   b:[{t:"Their market, said cleanly",k:["your market","not our claim","we're not","that's yours to","blackivy's market"]},
+      {t:"Upside framing",k:["joint","together","expansion","if the maps","down the line"]}],
+   m:"Not today — Tanzania is your market, and I wouldn't claim otherwise. Our footprint is Kenya now and Ghana next summer. If the partnership develops, expanding together into the third market is natural upside — but that's something we'd earn, not something I'd assert on a first call.",
+   trap:"'Tanzania is yours' phrasing was cut — it read wrong. Keep it factual, not deferential."},
+  {q:"Who's actually on the team?",
+   b:[{t:"Named clinical leadership",k:["griffith","cmo","chief medical","telemedicine","who-level","who level"]},
+      {t:"Depth beyond you",k:["silber","hospital systems","legal","angel","in-house","in house"]},
+      {t:"The studio",k:["perpetual core","venture studio","studio"]}],
+   m:"Our Chief Medical Officer is Dr. Michele Griffith — Ivy-trained, board-certified, thirty-five years clinical, and eighteen-plus years deploying telemedicine across low- and middle-income countries with WHO-level engagement. Dr. Steve Silber — thirty years directing large hospital systems, Harvard MHCM — is senior strategic advisor. We carry legal and angel-investment leadership in-house on the enterprise side. And Perpetual Core, our venture studio, builds the technology everything runs on. The delegation model is the tell: when we deployed to Kenya, we carried experts in every field we work in.",
+   trap:"Uplift Communities and Achumboro's name are OUT of this brief — 'government-contracted workforce program in New York' stays unbranded."},
+  {q:"What has your studio actually built?",
+   b:[{t:"Three named ventures",k:["uzima","kept count","iha advance","advance"]},
+      {t:"Framed as proof, not menu",k:["proof","evidence","architecture runs","not a pitch","not an investment"]}],
+   m:"Three shipped: Uzima City, a platform for planning and financing city-scale development in emerging markets. Kept Count, care-operations infrastructure that turns community health work into documented, billable revenue for providers — live now. And IHA Advance, twenty-five modules of free AI-native training we deployed across three Kenyan communities and left in-country. I mention them as evidence the architecture runs, not as an investment menu.",
+   trap:"The moment it sounds like a deal list, the 'nothing to sign' posture breaks."},
+  {q:"Could you actually work with one of our portfolio companies?",
+   b:[{t:"Yes — pilot shape",k:["pilot","kenya is the natural","one venture","around one"]},
+      {t:"The de-risk logic",k:["de-risk","de risk","input","uptake","adoption","trained talent"]},
+      {t:"Asset, not expense",k:["asset","not an expense","jointly built","co-build","cobuild"]}],
+   m:"That's the most concrete shape this could take. IHA stands up a health and workforce program around one BlackIvy venture — Kenya is the natural first, and LuccaHealth is the obvious fit: trained clinical and community health workers, plus community trust that drives patient uptake. Trained talent and community trust de-risk an operating business — that's an input to your portfolio, not philanthropy adjacent to it. And structured right, it doesn't have to be an expense at all — it can be a jointly built asset.",
+   trap:"Let this stay hypothetical unless he drives it. First call closes on a working session, not a term sheet."},
+  {q:"Give me a sense of scale — how big is IHA really? Team, budget?",
+   b:[{t:"Honest about stage",k:["young","early","new","lean","building","founding"]},
+      {t:"Depth over headcount",k:["griffith","silber","delegation","experts in every field","coalition","in-house"]},
+      {t:"Architecture over size",k:["architecture","engine","coalition","platform","leverage","studio"]}],
+   m:"We're a young institution, and I won't pretend otherwise — that's why the architecture matters more than the headcount. What we bring is depth, not mass: a CMO with eighteen years of LMIC telemedicine, a senior advisor who ran hospital systems, legal and angel-investment leadership in-house, and a venture studio building the infrastructure. And the coalition model means we deploy far beyond our own payroll — Kenya was five partner organizations moving together. The engine is designed so each cycle funds the next; we're built to compound, not to be big.",
+   trap:"Never inflate. A PE-literate firm can smell a padded org chart. Young-but-architected beats fake-big every time."},
+  {q:"What's your relationship with UNDP, exactly?",
+   b:[{t:"Coalition partner, precisely",k:["coalition partner","partnered","coalition","kenya's national","health agenda"]},
+      {t:"timbuktoo hook",k:["timbuktoo","innovation platform","pan-african","pan african"]},
+      {t:"Senior dialogue, role-framed",k:["most senior level","senior leadership","highest office","dialogue"]}],
+   m:"UNDP was a coalition partner in the Kenya deployment — connecting the work to Kenya's national health agenda, and to timbuktoo, their pan-African innovation platform. Beyond that, we're in dialogue at the most senior level of UN-Africa leadership, and with the African Union's highest office. I'm deliberately not naming names in documents — but I'm happy to say more person to person.",
+   trap:"Role framing only — the standing discretion rule. And know that theiha.org/kenya doesn't currently list UNDP; if his team checked the site, acknowledge the page is due an update rather than getting caught flat."},
+  {q:"How do you know Jessica — and have you met my father?",
+   b:[{t:"The true, light version",k:["silber","jessica","event","reintroduced","black-tie","black tie","met them both"]},
+      {t:"Respect without name-dropping",k:["admire","impressed","anbryce","first-generation","first generation"]}],
+   m:"Dr. Silber reintroduced me to Jessica — we'd first met at an event in New York a few years back, and she's been generous in making this connection. I have met your father, briefly, the same evening I met Jessica. And I'll say this person to person rather than put it in writing: what he and your mother built with AnBryce — full scholarships for first-generation professional students — is the same conviction our Academy work runs on. First-generation talent, given a real ladder.",
+   trap:"AnBryce stays VERBAL. No honoree ask, no Ascent invitation — both are off this call entirely."}
+];
+let qaCur=null,qaMic=null,qaText="";
+function qaMasteryLine(){
+  const n=Object.values(store.qaStats).filter(v=>v.perfect).length;
+  document.getElementById("qaMastery").textContent=`${n} of ${QA.length} questions nailed at 100%.`;
+  if(n>=5)markDone("qa");
+}
+qaMasteryLine();
+document.getElementById("qaDraw").onclick=()=>{
+  const unowned=QA.map((q,i)=>({q,i})).filter(x=>!(store.qaStats[x.i]&&store.qaStats[x.i].perfect));
+  const pick=(unowned.length?unowned:QA.map((q,i)=>({q,i})))[Math.floor(Math.random()*(unowned.length||QA.length))];
+  qaCur=pick; qaText="";
+  document.getElementById("qaQ").textContent="“"+pick.q.q+"”";
+  document.getElementById("qaAnswerZone").hidden=false;
+  document.getElementById("qaBeats").innerHTML=""; document.getElementById("qaModel").hidden=true;
+  document.getElementById("qaResult").textContent=""; document.getElementById("qaType").value="";
+  document.getElementById("qaTx").textContent="Speak your answer, or type below.";
+  document.getElementById("qaSpeak").disabled=false;
+  speak(pick.q.q);
+};
+document.getElementById("qaSpeak").onclick=()=>{if(qaCur)speak(qaCur.q.q)};
+document.getElementById("qaMic").onclick=()=>{
+  qaMic=makeMic(document.getElementById("qaTx"),document.getElementById("qaVoiceNote"),t=>{qaText=t});
+  if(qaMic){qaMic.start();document.getElementById("qaMicStop").disabled=false;document.getElementById("qaMic").disabled=true}
+};
+document.getElementById("qaMicStop").onclick=()=>{if(qaMic)qaMic.stop();document.getElementById("qaMicStop").disabled=true;document.getElementById("qaMic").disabled=false};
+document.getElementById("qaScore").onclick=()=>{
+  if(!qaCur)return;
+  const text=(qaText+" "+document.getElementById("qaType").value).trim();
+  if(!text){document.getElementById("qaResult").innerHTML='<span class="pill warn">Say or type something first</span>';return}
+  const beats=qaCur.q.b, hits=beats.filter(b=>hitAny(text,b.k));
+  const traps=TRAPS.filter(tr=>hitAny(text,tr.k));
+  document.getElementById("qaBeats").innerHTML=
+    beats.map(b=>{const h=hits.includes(b);return `<div class="beat${h?" hit":""}"><div class="bx">${h?"✓":""}</div><div><span class="bt">${b.t}</span></div></div>`}).join("")+
+    traps.map(tr=>`<div class="beat trap"><div class="bx">✕</div><div><span class="bt">LANDMINE: ${tr.t}</span> <span class="bd">— ${tr.d}</span></div></div>`).join("");
+  const perfect=hits.length===beats.length&&!traps.length;
+  document.getElementById("qaResult").innerHTML=traps.length?`<span class="pill crit">Stepped on a landmine</span>`:
+    perfect?`<span class="pill good">NAILED IT — ${hits.length}/${beats.length}</span>`:`<span class="pill warn">${hits.length}/${beats.length} beats</span>`;
+  const st=store.qaStats[qaCur.i]||(store.qaStats[qaCur.i]={tries:0,perfect:false});
+  st.tries++; if(perfect)st.perfect=true; save();
+  document.getElementById("qaModel").hidden=false;
+  document.getElementById("qaModelText").textContent=qaCur.q.m;
+  document.getElementById("qaTrapNote").textContent=qaCur.q.trap?("⚠️ "+qaCur.q.trap):"";
+  qaMasteryLine(); renderDash();
+};
+
+/* ---------- roleplay ---------- */
+const RP_STAGES=[
+  {open:"Lorenzo — good to meet you. Jessica speaks very highly of you, and I read the brief you sent over. I'll be straight with you: I know the outlines, but not the substance. Give me the real picture — what is IHA?",
+   b:[{t:"Institution + engine",k:["institution","engine","educate","capitalize","architecture"]},
+      {t:"Kenya as proof",k:["kenya","2500","2,500","nairobi","deployment","ran it"]},
+      {t:"Trust layer",k:["trust","pastors","invited","already there","350"]}],
+   warm:"That's a clearer answer than I usually get from nonprofit founders — most people lead with the need. You led with the machine. ",
+   cool:"Okay. I'll be honest, I'm still trying to place what's distinct here — a lot of organizations tell me they do training and community work. "},
+  {open:"Kenya — I've spent time in Nairobi, so I'm curious. What actually happened on the ground there? Concretely.",
+   b:[{t:"The numbers, cold",k:["2,500","2500","fourteen days","14 days","kakamega","mombasa","nairobi"]},
+      {t:"Conference + coalition",k:["university of nairobi","400","undp","coalition","business conference"]},
+      {t:"Left something behind",k:["left","in-country","advance","platform","still use"]}],
+   warm:"Fourteen days, three cities, and you left infrastructure behind — that's more operational than I expected. Our Nairobi team would recognize that tempo. ",
+   cool:"Hm. When someone gives me round numbers I always wonder what's underneath them. "},
+  {open:"Here's what I always have to ask, because we see a hundred mission-driven decks a year: how does something like this sustain itself financially?",
+   b:[{t:"Three capitals",k:["philanthropic","development","investment","three kinds"]},
+      {t:"Engine returns revenue",k:["studio","revenue","perpetual core","next cohort","pays for the next"]},
+      {t:"Honest about DeepFutures",k:["in formation","being formed","partner to capitalize"]}],
+   warm:"The three-capital structure is the interesting part — most 501(c)(3)s can only hold one. And I'll note you said 'in formation' without me dragging it out of you. Appreciated. ",
+   cool:"I've heard 'sustainable model' from a lot of organizations that were one grant away from the lights going out. I'd want to see that arithmetic. "},
+  {open:"You mentioned the investment side. My father sits on Carlyle's board — capital formation is dinner-table conversation in my family. Where does your vehicle actually stand? How much have you closed?",
+   b:[{t:"'In formation,' no flinch",k:["in formation","being formed","entity is not","stood up now","nothing closed","haven't closed"]},
+      {t:"No number offered",k:["not going to put a number","no target","wouldn't dress","too early for a number","won't quote"]},
+      {t:"Partner posture",k:["partner to capitalize","capital partners","alongside","don't assume we fund"]}],
+   warm:"Good answer. You'd be surprised how many people try to bluff that question — it's the fastest way to lose this firm. ",
+   cool:"Careful — that sounded like a number was about to happen. In this building, an unformed vehicle with a target is worse than no vehicle. ",
+   trapExtra:true},
+  {open:"Last one, and I mean it as a compliment that I'm asking: what do you actually want from BlackIvy? Everyone wants something.",
+   b:[{t:"Conversation, no ask",k:["conversation","no ask","not coming with an ask","understand what you're building"]},
+      {t:"Overlap logic",k:["maps overlap","same countries","same markets","layers","stack"]},
+      {t:"Commercial shape if pushed",k:["pilot","de-risk","de risk","trained talent","portfolio","jointly built","asset"]}],
+   warm:"That's the right answer, and I don't say that often. ",
+   cool:"Hm. That felt like an ask wearing a costume. "}
+];
+let rpStage=0,rpScore=0,rpMax=0,rpMic=null,rpText="",rpOver=false;
+const rpChat=document.getElementById("rpChat");
+function rpMsg(cls,who,text){
+  const d=document.createElement("div"); d.className="msg "+cls;
+  d.innerHTML=`<div class="who">${who}</div>${text}`;
+  rpChat.appendChild(d); rpChat.scrollTop=rpChat.scrollHeight;
+}
+function rpBryant(text){
+  rpMsg("him","Bryant Welters",text);
+  if(document.getElementById("rpTts").checked)speak(text.replace(/<[^>]+>/g,""));
+}
+function rpStart(){
+  rpChat.innerHTML=""; rpStage=0; rpScore=0; rpMax=0; rpOver=false;
+  rpBryant(RP_STAGES[0].open);
+}
+function rpFinish(){
+  rpOver=true;
+  const pct=rpMax?Math.round(rpScore/rpMax*100):0;
+  let close;
+  if(pct>=75)close="Look — this maps to things we genuinely wrestle with on the portfolio side. Talent pipelines, community adoption. Let me talk to a couple of people internally, and let's set a working session — I'd like our Nairobi lead in the room. I'll email you and Jessica this week.";
+  else if(pct>=50)close="This was useful. Let me sit with it and share the brief internally. Keep in touch through Jessica.";
+  else close="I appreciate you walking me through it. We see a lot of organizations working in these markets — I'll flag it if something fits.";
+  rpBryant(close);
+  rpMsg("debrief","Debrief",`You hit <strong>${rpScore} of ${rpMax}</strong> beats — <strong>${pct}%</strong>. ${pct>=75?"That's the working-session close. That's the win.":pct>=50?"He's polite but not activated — the trust-layer and no-ask beats are what move him.":"Run the flashcards and Q&A first, then come back."} Reset to run it again.`);
+  if(store.rpBest===null||pct>store.rpBest){store.rpBest=pct}
+  if(pct>=75)markDone("rp");
+  save(); renderDash();
+}
+function rpSend(){
+  if(rpOver){return}
+  const text=(rpText+" "+document.getElementById("rpType").value).trim();
+  if(!text)return;
+  rpMsg("me","You",text.replace(/</g,"&lt;"));
+  document.getElementById("rpType").value=""; rpText="";
+  const st=RP_STAGES[rpStage];
+  const hits=st.b.filter(b=>hitAny(text,b.k)).length;
+  const traps=TRAPS.filter(tr=>hitAny(text,tr.k));
+  rpScore+=Math.max(0,hits-(traps.length?1:0)); rpMax+=st.b.length;
+  let reaction=traps.length?`<em>${traps[0].t}.</em> ${traps[0].d} `:(hits>=Math.ceil(st.b.length*0.66)?st.warm:st.cool);
+  rpStage++;
+  if(rpStage<RP_STAGES.length){rpBryant(reaction+RP_STAGES[rpStage].open)}
+  else{rpBryant(reaction.trim());setTimeout(rpFinish,900)}
+}
+document.getElementById("rpSend").onclick=rpSend;
+document.getElementById("rpType").addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();rpSend()}});
+document.getElementById("rpReset").onclick=rpStart;
+document.getElementById("rpMic").onclick=()=>{
+  rpMic=makeMic({set innerHTML(v){document.getElementById("rpType").value=v.replace(/<[^>]+>/g,"")},classList:{add(){},remove(){}},set textContent(v){}},document.getElementById("rpVoiceNote"),t=>{rpText=t;document.getElementById("rpType").value=t});
+  if(rpMic){rpMic.start();document.getElementById("rpMicStop").disabled=false;document.getElementById("rpMic").disabled=true}
+};
+document.getElementById("rpMicStop").onclick=()=>{if(rpMic)rpMic.stop();document.getElementById("rpMicStop").disabled=true;document.getElementById("rpMic").disabled=false};
+rpStart();
+
+/* ---------- landmines ---------- */
+const MINES=[
+  {t:"Dependency framing — 'their success relies on us'",w:"Toward a firm that has operated these markets for a decade, it reads presumptuous. Lorenzo rejected this framing explicitly on 08-06.",s:"Peers with complementary layers: 'same countries, same conviction, different layers of one stack.' Say what we bring; never claim their outcome hinges on it."},
+  {t:"Pitching the firm as Tony's",w:"Cheryl Mills is CEO; Tony is Executive Chairman. Getting the org chart wrong to the chairman's son is unrecoverable.",s:"Talk to Bryant about the firm Mills runs and the portfolio. Tony enters only via the verbal AnBryce bridge — warmly, briefly."},
+  {t:"Any dollar figure on DeepFutures",w:"An unraised target invites 'how much have you closed?' from a Carlyle-board family. Entity isn't formed yet.",s:"'In formation.' Purpose real, entity being stood up, we partner to capitalize. Full stop."},
+  {t:"Asking for a donation or DeepFutures capital",w:"BlackIvy has no grantmaking arm — the philanthropy is Tony personally via AnBryce, a later door through relationship. Anchoring an unformed vehicle reads naïve.",s:"No ask on this call. If pressed: the commercial shapes — a pilot around a portfolio company, funded as operations because trained talent de-risks their asset."},
+  {t:"Raising CINQCARE — business or 'partnership'",w:"Student placement is in discussions, not locked. Claiming it is a false statement to someone who can check at dinner.",s:"Don't raise CINQCARE at all on this first call. If he raises it, keep it modest: 'early conversations on the talent side, through Jessica.'"},
+  {t:"'Tanzania is yours' / any Tanzania claim",w:"IHA has no Tanzania footprint; the deferential phrasing read wrong and was cut.",s:"Kenya now, Ghana summer 2027. Tanzania = joint-expansion upside if the partnership develops."},
+  {t:"Mentioning Ascent / October",w:"Sales closed 08-08, nobody paid, event postponed. It was scrubbed from the brief and cover email.",s:"It doesn't exist for this meeting. If asked about convenings: 'we convene — I'll share dates when the next one is set.'"},
+  {t:"Naming the UN-Africa / AU principals",w:"Standing discretion rule — names never go in writing, and a first video call is not 'the room' unless the moment truly demands it.",s:"'Dialogue at the most senior level of UN-Africa leadership, and with the African Union's highest office.'"},
+  {t:"A '400+ faith-leader network'",w:"There is no such number. The 350+ pastors ARE the network; ~400 was the business conference. Double-counting torpedoes every other number.",s:"350+ pastors and leaders — the network. ~400 — the conference. Keep them apart."},
+  {t:"'We built the network through TPC'",w:"False — and weaker than the truth.",s:"'It was already there. Its leaders invited our ministry partner in to steward the work. A network that invites you in is standing trust, already earned.'"},
+  {t:"'20,000 jobs in two years' / '100,000 jobs per county'",w:"Aspirational site copy that won't survive PE diligence sitting next to verified numbers.",s:"Only the verified Kenya numbers. Nothing else exists."},
+  {t:"The honoree ask, or any event invitation, in this meeting",w:"Sequencing call: formal asks come later, by phone, with a temperature read — and the event itself is postponed anyway.",s:"Nothing to invite him to. Close on the working session."},
+  {t:"Leading with the program list",w:"A Mills/Collier-literate firm has seen a thousand program lists. It's the fastest way to be filed under 'NGO.'",s:"Lead with the trust-and-adoption argument — the classic binding constraint on essential-sector businesses in frontier markets. They will get it instantly."}
+];
+document.getElementById("mineList").innerHTML=MINES.map(m=>`<div class="mine"><div class="mt">✕ ${m.t}</div><div class="mw">${m.w}</div><div class="ms">→ ${m.s}</div></div>`).join("");
+
+/* ---------- scripts ---------- */
+const SCRIPTS=[
+  {t:"The one-liner (cover-email version)",body:`"BlackIvy builds the hard infrastructure sub-Saharan Africa needs. We build the human infrastructure — the trained health workers, technicians, operators, and entrepreneurs, and the community relationships underneath them — in the same markets."`},
+  {t:"The trust-layer paragraph — your best 30 seconds",body:`"The 350+ leaders we convened are, at their core, pastors and church leaders — and the network is not ours by construction. It was already there, established in its communities long before we arrived. Its leaders asked our ministry partner to help steward and organize the work.
+
+That distinction is the whole point. A network you build takes years. A network that invites you in is standing trust, already earned by the people who hold it. In these markets the binding constraint is rarely capital or product — it's trust and last-mile adoption.
+
+Anyone can buy media. Nobody can buy this."`},
+  {t:"The engine, spoken",body:`"We educate people through IHA's programs. We deploy them into real, government-contracted careers and into the ventures our studio builds. We capitalize those ventures through partnership — Perpetual Core, capital partners, and DeepFutures, the vehicle now being formed. And we scale it on infrastructure the studio builds — which returns revenue to fund the next cohort. Ten percent of revenue goes back to community by design.
+
+Each cycle pays for the next one. This isn't charity. It's architecture."`},
+  {t:"The three shapes — only if he asks 'what could this look like'",body:`"Three shapes, if the maps overlap the way I think they do.
+
+One — a pilot. IHA stands up a health and workforce program around one BlackIvy venture. Kenya is the natural first.
+
+Two — a co-build. A jointly created healthcare-workforce company supplying trained talent across the portfolio. An asset, not an expense.
+
+Three — down the line, co-investing on African health and workforce opportunities, alongside our capital partners and DeepFutures as it forms.
+
+But I want to be clear: today I'm proposing a conversation, nothing more."`},
+  {t:"The AnBryce bridge — VERBAL ONLY, never in writing",body:`"I'll say this person to person rather than put it in a document: what your parents built with AnBryce — full scholarships for first-generation professional students — is the same conviction our Academy work runs on. First-generation talent, given a real ladder. It's part of why I thought this conversation was worth having beyond any business logic."
+
+(Use once, warmly, late in the call or at the close. It is a bridge, not a pitch. No follow-up ask attached to it.)`},
+  {t:"The close",body:`"This confirmed what I hoped — we're working the same countries from different layers of the stack. I'd love to keep the maps side by side. What would be useful on your end — a working session with whoever's closest to talent on the portfolio side, or should the two of us go another round first?"
+
+(If he offers to share internally: "Tell me who it's going to and I'll tailor one page for them." — that's the second touch.)`},
+  {t:"If asked about money, in one breath",body:`"Philanthropic capital through the 501(c)(3), development capital through the coalition, investment capital through the studio and partners — and DeepFutures, candidly, is in formation. The near-term overlap with a firm like yours isn't philanthropic anyway — it's operational. Trained talent and community adoption are inputs to an essential-sector business, and that's worth exactly what it saves you."`},
+  {t:"Questions to ask HIM (steal from Game Plan)",body:`· "What does External Affairs own at BlackIvy — where do you sit between the portfolio and the outside world?"
+· "Where do the portfolio companies feel talent constraints most?"
+· "How do you approach local adoption and trust when you stand something up in a new community?"
+· "What do the next 18 months look like across Accra, Nairobi, Dar?"
+· "Is Lions-to-Unicorns still how the firm frames the moment?"`}
+];
+document.getElementById("scriptList").innerHTML=SCRIPTS.map(s=>`<details class="scr"><summary>${s.t}</summary><div class="body"><div class="quote">${s.body.replace(/</g,"&lt;")}</div></div></details>`).join("");
+
+/* ---------- live notes ---------- */
+const notesEl=document.getElementById("liveNotes");
+notesEl.value=store.liveNotes||"";
+notesEl.addEventListener("input",()=>{store.liveNotes=notesEl.value;save()});
+
+/* ---------- gate (public deployment only) ---------- */
+(function(){
+  const GATE_ON=location.hostname.endsWith("perpetualcore.com");
+  if(!GATE_ON)return;
+  try{if(sessionStorage.getItem("biGate")==="ok")return}catch(e){}
+  const g=document.createElement("div"); g.className="gate";
+  g.innerHTML=`<div class="gcard"><div class="eyebrow">Private</div><h2 style="font-size:19px">This page is not public.</h2><input type="password" id="gateIn" autocomplete="off" aria-label="Passcode"><br><button class="btn primary" id="gateGo">Enter</button><p class="note" style="margin-top:12px">If you reached this by accident, there's nothing for you here.</p></div>`;
+  document.body.appendChild(g);
+  const tryGate=()=>{
+    if(document.getElementById("gateIn").value.trim().toLowerCase()==="kakamega"){
+      try{sessionStorage.setItem("biGate","ok")}catch(e){}
+      g.remove();
+    } else {document.getElementById("gateIn").value="";document.getElementById("gateIn").placeholder="try again"}
+  };
+  g.querySelector("#gateGo").onclick=tryGate;
+  g.querySelector("#gateIn").addEventListener("keydown",e=>{if(e.key==="Enter")tryGate()});
+  setTimeout(()=>g.querySelector("#gateIn").focus(),100);
+})();
+
+renderDash();
+</script>

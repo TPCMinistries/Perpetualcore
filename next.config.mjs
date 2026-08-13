@@ -186,6 +186,13 @@ const nextConfig = {
         permanent: false,
       },
       {
+        // Lowercase variant for the BlackIvy Meeting Gym (app/BI serves
+        // the canonical uppercase path; redirects are case-sensitive).
+        source: "/bi",
+        destination: "/BI.html",
+        permanent: false,
+      },
+      {
         // /contact alias → existing /contact-sales surface.
         // The brief specifies CTAs like /contact?product=vellum on
         // /products/vellum; we don't have a /contact route, so this
