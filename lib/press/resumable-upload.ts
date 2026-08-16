@@ -4,6 +4,7 @@ import { Upload, type DetailedError } from "tus-js-client";
 
 export const PRESS_TUS_CHUNK_BYTES = 6 * 1024 * 1024;
 export const PRESS_TUS_RETRY_DELAYS_MS = [0, 3_000, 5_000, 10_000, 20_000] as const;
+const PRESS_TUS_SIGNED_TRANSPORT_VERSION = "signed-v2";
 
 export interface PressTusUploadInput {
   assetId: string;
@@ -23,7 +24,7 @@ export function getPressTusEndpoint(supabaseUrl = process.env.NEXT_PUBLIC_SUPABA
     const projectRef = url.hostname.slice(0, -".supabase.co".length);
     url.hostname = `${projectRef}.storage.supabase.co`;
   }
-  url.pathname = "/storage/v1/upload/resumable";
+  url.pathname = "/storage/v1/upload/resumable/sign";
   url.search = "";
   url.hash = "";
   return url.toString().replace(/\/$/, "");
@@ -56,6 +57,7 @@ export function createPressResumableUpload(input: PressTusUploadInput): Upload {
     },
     fingerprint: async (file) => [
       "press",
+      PRESS_TUS_SIGNED_TRANSPORT_VERSION,
       input.assetId,
       file.name,
       file.size,

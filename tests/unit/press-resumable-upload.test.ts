@@ -9,9 +9,9 @@ import {
 describe("Press resumable uploads", () => {
   it("uses the direct hosted Storage endpoint and preserves local endpoints", () => {
     expect(getPressTusEndpoint("https://project-ref.supabase.co"))
-      .toBe("https://project-ref.storage.supabase.co/storage/v1/upload/resumable");
+      .toBe("https://project-ref.storage.supabase.co/storage/v1/upload/resumable/sign");
     expect(getPressTusEndpoint("http://127.0.0.1:54321"))
-      .toBe("http://127.0.0.1:54321/storage/v1/upload/resumable");
+      .toBe("http://127.0.0.1:54321/storage/v1/upload/resumable/sign");
   });
 
   it("creates a signed, non-upsert TUS upload with exact Supabase settings", async () => {
@@ -31,6 +31,7 @@ describe("Press resumable uploads", () => {
     expect(upload.options.retryDelays).toEqual([...PRESS_TUS_RETRY_DELAYS_MS]);
     expect(upload.options.uploadDataDuringCreation).toBe(true);
     expect(upload.options.removeFingerprintOnSuccess).toBe(true);
+    expect(upload.options.endpoint).toBe("https://test.storage.supabase.co/storage/v1/upload/resumable/sign");
     expect(upload.options.headers).toMatchObject({ apikey: "test-anon-key", "x-signature": "signed-token" });
     expect(upload.options.headers).not.toHaveProperty("authorization");
     expect(upload.options.headers).not.toHaveProperty("x-upsert");
