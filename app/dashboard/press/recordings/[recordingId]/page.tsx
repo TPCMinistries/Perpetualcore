@@ -1,5 +1,10 @@
 import { redirect } from "next/navigation";
 
-export default function PressRecordingPage({ params }: { params: { recordingId: string } }) {
-  redirect(`/press/studio/recordings/${params.recordingId}`);
+export default async function PressRecordingPage({
+  params,
+}: {
+  params: Promise<{ recordingId: string }>;
+}) {
+  const { recordingId } = await params;
+  redirect(`/press/studio/recordings/${recordingId}`);
 }

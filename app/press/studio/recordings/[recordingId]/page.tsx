@@ -1,5 +1,10 @@
 import { PressWorkspacePage } from "@/components/press/PressWorkspacePage";
 
-export default function PressStudioRecordingPage({ params }: { params: { recordingId: string } }) {
-  return <PressWorkspacePage projectId={params.recordingId} />;
+export default async function PressStudioRecordingPage({
+  params,
+}: {
+  params: Promise<{ recordingId: string }>;
+}) {
+  const { recordingId } = await params;
+  return <PressWorkspacePage projectId={recordingId} />;
 }
