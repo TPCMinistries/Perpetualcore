@@ -14,6 +14,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { PressStatusBadge } from "./PressStatusBadge";
 import type { PressProject } from "./types";
 
@@ -27,6 +28,19 @@ function formatDate(value: string): string {
   }).format(date);
 }
 
+function isAbandonedUpload(project: PressProject): boolean {
+  if (project.status !== "uploading") return false;
+  const updatedAt = new Date(project.updatedAt).getTime();
+  if (Number.isNaN(updatedAt)) return false;
+  return Date.now() - updatedAt > 30 * 60 * 1000;
+}
+
+function statusHelper(project: PressProject): string | null {
+  if (isAbandonedUpload(project)) return "Previous upload attempt. Hidden from Active recordings.";
+  if (project.status === "transcribing") return "Active transcription is running on the Mac Mini.";
+  return null;
+}
+
 export function RecordingList({ projects }: { projects: PressProject[] }) {
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState("active");
@@ -34,7 +48,7 @@ export function RecordingList({ projects }: { projects: PressProject[] }) {
     const normalizedQuery = query.trim().toLowerCase();
     return projects.filter((project) => {
       const matchesStatus = status === "all"
-        || (status === "active" ? project.status !== "archived" : project.status === status);
+        || (status === "active" ? project.status !== "archived" && !isAbandonedUpload(project) : project.status === status);
       const matchesQuery = !normalizedQuery
         || project.title.toLowerCase().includes(normalizedQuery)
         || project.assets?.some((asset) => asset.fileName.toLowerCase().includes(normalizedQuery));
@@ -49,7 +63,7 @@ export function RecordingList({ projects }: { projects: PressProject[] }) {
           <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-[#1648d8]">Your workspace</p>
           <h2 id="recordings-title" className="mt-2 text-2xl font-black tracking-[-0.04em] text-[#121214]">Content packs</h2>
         </div>
-        <p className="text-sm text-black/50">{projects.length} {projects.length === 1 ? "recording" : "recordings"}</p>
+        <p className="text-sm text-black/50">{visibleProjects.length} shown · {projects.length} total</p>
       </div>
 
       <div className="mb-4 grid gap-3 border border-black/10 bg-white p-4 sm:grid-cols-[minmax(0,1fr)_220px]">
@@ -102,8 +116,11 @@ export function RecordingList({ projects }: { projects: PressProject[] }) {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {visibleProjects.map((project) => (
-              <TableRow key={project.id} className="group">
+            {visibleProjects.map((project) => {
+              const helper = statusHelper(project);
+              const abandoned = isAbandonedUpload(project);
+              return (
+              <TableRow key={project.id} className={cn("group", abandoned && "bg-zinc-50 text-zinc-500")}>
                 <TableCell>
                   <div className="flex min-w-0 items-center gap-3">
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center bg-zinc-100 text-zinc-600">
@@ -114,6 +131,7 @@ export function RecordingList({ projects }: { projects: PressProject[] }) {
                         {project.title}
                       </Link>
                       {project.assets?.[0]?.fileName && <p className="mt-0.5 max-w-md truncate text-xs text-zinc-500">{project.assets[0].fileName}</p>}
+                      {helper && <p className="mt-1 max-w-md text-xs leading-5 text-zinc-500">{helper}</p>}
                     </div>
                   </div>
                 </TableCell>
@@ -125,7 +143,8 @@ export function RecordingList({ projects }: { projects: PressProject[] }) {
                   </Link>
                 </TableCell>
               </TableRow>
-            ))}
+            );
+            })}
           </TableBody>
         </Table>
       </div>}
