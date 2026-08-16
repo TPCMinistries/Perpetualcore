@@ -42,10 +42,11 @@ export function createPressResumableUpload(input: PressTusUploadInput): Upload {
     storeFingerprintForResuming: true,
     headers: {
       apikey: publishableKey,
-      // The TUS endpoint authenticates via Authorization; the signed upload
-      // token from createSignedUploadUrl is a valid JWS for this. Sending it
-      // as x-signature is rejected with "Invalid Compact JWS".
-      authorization: `Bearer ${input.token}`,
+      // Supabase signed resumable uploads authenticate with the upload token
+      // in x-signature. User-session uploads use Authorization, but Press
+      // issues short-lived signed upload URLs server-side so the browser never
+      // needs a storage-write JWT.
+      "x-signature": input.token,
     },
     metadata: {
       bucketName: input.bucket,
