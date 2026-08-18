@@ -129,6 +129,11 @@ function readToolResult<T>(response: Anthropic.Message, toolName: string): T {
   if (response.stop_reason === "refusal") {
     throw new PressHttpError(502, "Press's writer declined to respond to this story. Try adjusting the notes or photos.");
   }
+  if (response.stop_reason === "max_tokens") {
+    // Opus 5 thinks before it answers and that thinking counts toward max_tokens; a truncated
+    // tool_use input parses as a partial object, so refuse it rather than saving half a result.
+    throw new PressHttpError(502, "Press's writer ran out of room before finishing. Try again.");
+  }
   const block = response.content.find(
     (candidate): candidate is Anthropic.ToolUseBlock => candidate.type === "tool_use" && candidate.name === toolName,
   );
@@ -184,7 +189,7 @@ export async function askNextInterviewQuestion(
 
   const response = await getAnthropicClient().messages.create({
     model: PRESS_STORY_MODEL,
-    max_tokens: 1024,
+    max_tokens: 4096,
     system: systemPrompt,
     tools: [tool],
     tool_choice: { type: "tool", name: "next_question" },
@@ -213,6 +218,7 @@ export async function generateStoryOutputs(
     formatInterviewTranscript(story),
     "",
     "Write the full set of content pieces now, in the voice above.",
+    "For x_thread_text: write 3 to 7 posts, each ≤ 280 characters, separated by a line containing only ---.",
   ].filter((line): line is string => line !== null).join("\n");
 
   const assetIdSchema = uploadedAssetIds.length > 0
@@ -229,12 +235,10 @@ export async function generateStoryOutputs(
         summary: { type: "string", description: "One-paragraph plain summary of what happened, in the voice." },
         linkedin: { type: "string", description: "LinkedIn post, 900-1500 characters, line breaks, at most 3 hashtags total." },
         instagram: { type: "string", description: "Instagram caption, at most 2000 characters, with 5-10 hashtags at the end." },
-        x_thread: {
-          type: "array",
-          description: "One post per array item, 3-7 posts, each at most 280 characters.",
-          items: { type: "string" },
-          minItems: 3,
-          maxItems: 7,
+        x_thread_text: {
+          type: "string",
+          description:
+            "The X/Twitter thread as ONE string: 3-7 posts, each at most 280 characters, separated by a line containing only --- (three hyphens).",
         },
         newsletter: {
           type: "object",
@@ -267,20 +271,51 @@ export async function generateStoryOutputs(
           maxItems: 6,
         },
       },
-      required: ["headline", "summary", "linkedin", "instagram", "x_thread", "newsletter", "photo_captions", "hooks"],
+      required: ["headline", "summary", "linkedin", "instagram", "x_thread_text", "newsletter", "photo_captions", "hooks"],
       additionalProperties: false,
     },
   };
 
-  const response = await getAnthropicClient().messages.create({
+  // Streamed so the SDK's long-request guard doesn't reject the large max_tokens; we only need the final message.
+  const response = await getAnthropicClient().messages.stream({
     model: PRESS_STORY_MODEL,
-    max_tokens: 8000,
+    max_tokens: 24000,
     system: systemPrompt,
     tools: [tool],
     tool_choice: { type: "tool", name: "deliver_content" },
     messages: [{ role: "user", content: [...assetBlocks, { type: "text", text: userText }] }],
-  });
+  }).finalMessage();
 
-  const delivered = readToolResult<Omit<PressStoryOutputs, "generated_at" | "model">>(response, "deliver_content");
-  return { ...delivered, generated_at: new Date().toISOString(), model: PRESS_STORY_MODEL };
+  type Delivered = Partial<Omit<PressStoryOutputs, "generated_at" | "model" | "x_thread">> & { x_thread_text?: unknown; x_thread?: string[] };
+  const delivered = readToolResult<Delivered>(response, "deliver_content");
+  // The thread comes back as one delimited string (arrays of long strings were unreliable in tool input);
+  // split on --- lines, falling back to blank-line paragraphs.
+  const threadText = typeof delivered.x_thread_text === "string" ? delivered.x_thread_text : "";
+  let posts = threadText.split(/\n\s*---\s*\n/).map((post) => post.trim()).filter(Boolean);
+  if (posts.length < 3) posts = threadText.split(/\n{2,}/).map((post) => post.trim()).filter(Boolean);
+  delivered.x_thread = posts;
+  const complete =
+    typeof delivered.headline === "string" && typeof delivered.summary === "string" &&
+    typeof delivered.linkedin === "string" && typeof delivered.instagram === "string" &&
+    Array.isArray(delivered.x_thread) && delivered.x_thread.length >= 3 &&
+    !!delivered.newsletter && typeof delivered.newsletter.subject === "string" && typeof delivered.newsletter.body === "string" &&
+    Array.isArray(delivered.photo_captions) && Array.isArray(delivered.hooks) && delivered.hooks.length >= 3;
+  if (!complete) {
+    console.error("[press.stories] incomplete generation", {
+      stop_reason: response.stop_reason,
+      keys: Object.keys(delivered),
+      x_thread: JSON.stringify(delivered.x_thread).slice(0, 300),
+      hooks: JSON.stringify(delivered.hooks).slice(0, 300),
+      photo_captions: JSON.stringify(delivered.photo_captions).slice(0, 300),
+      usage: response.usage,
+    });
+    throw new PressHttpError(502, "Press's writer returned an incomplete set of content. Try again.");
+  }
+  const { x_thread_text: _threadText, ...rest } = delivered;
+  void _threadText;
+  return {
+    ...(rest as Omit<PressStoryOutputs, "generated_at" | "model">),
+    generated_at: new Date().toISOString(),
+    model: PRESS_STORY_MODEL,
+  };
 }
