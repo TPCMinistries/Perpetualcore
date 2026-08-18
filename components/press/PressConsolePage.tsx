@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AlertCircle, CheckCircle2, Clock3, Eye, Loader2, RefreshCw } from "lucide-react";
+import Link from "next/link";
+import { AlertCircle, ArrowRight, CheckCircle2, Clock3, Eye, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { getErrorMessage, getPressSystemStatus, listPressProjects } from "./api-client";
@@ -52,6 +53,19 @@ export function PressConsolePage() {
         title="One recording. Every useful next step."
         description="Add a video, podcast, interview, class, or event when you are ready. Press turns it into a reviewable content pack—and stays quiet until you ask it to work."
       />
+
+      <Link
+        href="/press/studio/stories"
+        className="group flex items-center justify-between gap-4 border border-black/10 bg-[#c7f34b] px-5 py-4 transition-colors duration-200 hover:bg-[#b6e02f] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1648d8] focus-visible:ring-offset-2 sm:px-7"
+      >
+        <span className="flex items-center gap-3">
+          <Sparkles className="h-5 w-5 shrink-0 text-[#121214]" aria-hidden />
+          <span className="text-sm font-semibold text-[#121214] sm:text-base">
+            <strong className="font-black">New: Stories</strong> — turn today&apos;s photos into posts
+          </span>
+        </span>
+        <ArrowRight className="h-4 w-4 shrink-0 text-[#121214] transition-transform group-hover:translate-x-0.5 motion-reduce:transform-none" aria-hidden />
+      </Link>
 
       <RecordingUploader
         processingMessage={systemStatus?.ready === false ? systemStatus.message : undefined}
