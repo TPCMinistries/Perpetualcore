@@ -30,6 +30,12 @@ export function PressConsoleHeader({ eyebrow = "Press console", title, descripti
           >
             See how it works <ArrowUpRight className="h-4 w-4" aria-hidden />
           </Link>
+          <Link
+            href="/press/studio/stories"
+            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full border border-black/15 bg-white px-6 text-sm font-semibold text-black/70 transition-colors duration-200 hover:border-black/30 hover:text-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1648d8]"
+          >
+            Stories <ArrowUpRight className="h-4 w-4" aria-hidden />
+          </Link>
         </div>
       </div>
     </header>
