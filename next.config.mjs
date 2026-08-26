@@ -179,15 +179,6 @@ const nextConfig = {
         permanent: false,
       },
       {
-        // Branded review link for the Gullah Geechee Chamber website
-        // upgrade. Keep this temporary while the Chamber reviews the
-        // new site; the destination can move to its final production
-        // host without browsers caching the current review URL.
-        source: "/gullahgeecheechamber",
-        destination: "https://gullah-geechee-chamber-2026.gdimedia.chatgpt.site",
-        permanent: false,
-      },
-      {
         // Uppercase variant (Next redirects are case-sensitive; the
         // link is shared as perpetualcore.com/HDGM).
         source: "/HDGM",
@@ -256,7 +247,7 @@ const nextConfig = {
           "img-src 'self' data: blob: https: http:",
           "font-src 'self' https://fonts.gstatic.com data: https://client.crisp.chat",
           "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://api.stripe.com https://api.openai.com https://api.anthropic.com https://*.sentry.io https://www.google-analytics.com https://vitals.vercel-insights.com https://client.crisp.chat wss://client.relay.crisp.chat",
-          "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://client.crisp.chat",
+          "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://client.crisp.chat https://gullah-geechee-chamber-2026.gdimedia.chatgpt.site",
           "object-src 'none'",
           "base-uri 'self'",
           "form-action 'self'",
