@@ -179,6 +179,15 @@ const nextConfig = {
         permanent: false,
       },
       {
+        // Branded review link for the Gullah Geechee Chamber website
+        // upgrade. Keep this temporary while the Chamber reviews the
+        // new site; the destination can move to its final production
+        // host without browsers caching the current review URL.
+        source: "/gullahgeecheechamber",
+        destination: "https://gullah-geechee-chamber-2026.gdimedia.chatgpt.site",
+        permanent: false,
+      },
+      {
         // Uppercase variant (Next redirects are case-sensitive; the
         // link is shared as perpetualcore.com/HDGM).
         source: "/HDGM",
