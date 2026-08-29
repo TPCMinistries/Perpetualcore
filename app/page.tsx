@@ -3,6 +3,7 @@ import { ArrowRight, ArrowUpRight, Check, CornerDownRight, MoveRight } from "luc
 import { SiteNav } from "@/components/next-site/SiteNav";
 import { SiteFooter } from "@/components/next-site/SiteFooter";
 import { SystemField } from "@/components/next-site/SystemField";
+import { Reveal } from "@/components/next-site/Reveal";
 
 export const metadata = { title: "Perpetual Core — Institutional systems, built to operate", description: "Perpetual Core builds governed AI infrastructure and focused vertical companies for consequential institutional work." };
 
@@ -18,13 +19,13 @@ export default function HomePage() {
     <main>
       <section className="px-5 pb-16 pt-28 sm:px-8 sm:pb-24 sm:pt-36">
         <div className="mx-auto grid max-w-[1500px] gap-10 lg:grid-cols-[.88fr_1.12fr] lg:items-center lg:gap-14">
-          <div className="relative z-10">
+          <Reveal className="relative z-10">
             <div className="inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[10px] font-black tracking-[.14em]"><span className="h-2 w-2 rounded-full bg-[#2457ff]" /> INSTITUTIONAL AI / OPERATING INFRASTRUCTURE</div>
             <h1 className="mt-8 max-w-[760px] text-[clamp(3.3rem,7.5vw,7.4rem)] font-black leading-[.82] tracking-[-.075em]">BUILD WHAT THE WORK <span className="text-[#2457ff]">REQUIRES.</span></h1>
             <p className="mt-8 max-w-2xl text-lg font-medium leading-8 text-[#565c68] sm:text-xl">Perpetual Core turns fragmented institutional work into governed systems—then builds focused companies where the market demands depth.</p>
             <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/contact-sales" className="inline-flex min-h-14 items-center justify-center rounded-[14px] bg-[#2457ff] px-6 text-sm font-black text-white transition-colors hover:bg-[#173ed4]">Map a system <ArrowRight className="ml-2 h-4 w-4" /></Link><Link href="#network" className="inline-flex min-h-14 items-center justify-center rounded-[14px] border border-black/15 px-6 text-sm font-black hover:bg-white/60">Enter the network <CornerDownRight className="ml-2 h-4 w-4" /></Link></div>
             <div className="mt-12 flex items-center gap-4 border-t border-black/10 pt-5 text-xs font-bold text-[#747985]"><span>HEALTHCARE</span><span className="h-1 w-1 rounded-full bg-black/25"/><span>WORKFORCE</span><span className="h-1 w-1 rounded-full bg-black/25"/><span>EDUCATION</span></div>
-          </div>
+          </Reveal>
           <SystemField />
         </div>
       </section>
