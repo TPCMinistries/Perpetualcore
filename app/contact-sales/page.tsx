@@ -218,11 +218,11 @@ function ContactSalesForm() {
   return (
     <>
       {/* Hero */}
-      <section className="container mx-auto px-6 sm:px-8 pt-36 pb-12 sm:pt-44 sm:pb-16">
+      <section className="container mx-auto px-6 sm:px-8 pt-32 pb-12 sm:pt-36 sm:pb-14">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <SectionRail index="00" label="Map the operating system" />
           <div className="max-w-3xl">
-            <h1 className="text-5xl font-black leading-[.9] tracking-[-.06em] text-[#12151c] sm:text-7xl lg:text-8xl">
+            <h1 className="max-w-4xl text-5xl font-black leading-[.92] tracking-[-.055em] text-[#12151c] sm:text-6xl lg:text-7xl">
               BRING US THE BROKEN HANDOFF.
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
