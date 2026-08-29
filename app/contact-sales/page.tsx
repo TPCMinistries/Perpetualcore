@@ -22,8 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
+import { SiteNav } from "@/components/next-site/SiteNav";
+import { SiteFooter } from "@/components/next-site/SiteFooter";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { serviceSchema } from "@/lib/seo/structured-data";
 import { toast } from "sonner";
@@ -218,12 +218,12 @@ function ContactSalesForm() {
   return (
     <>
       {/* Hero */}
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
+      <section className="container mx-auto px-6 sm:px-8 pt-36 pb-12 sm:pt-44 sm:pb-16">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
             <SectionRail index="00" label="Map the operating system" />
           <div className="max-w-3xl">
-            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
-              Tell us where AI needs to touch the company.
+            <h1 className="text-5xl font-black leading-[.9] tracking-[-.06em] text-[#12151c] sm:text-7xl lg:text-8xl">
+              BRING US THE BROKEN HANDOFF.
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
               {isPostPaymentIntake
@@ -493,7 +493,7 @@ function ContactSalesForm() {
 
 export default function ContactSalesPage() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-[#f3f1ea] text-[#12151c]">
       <JsonLd
         data={serviceSchema({
           name: "AI Implementation Engagement",
@@ -503,11 +503,11 @@ export default function ContactSalesPage() {
         })}
       />
       <SkipLink />
-      <Navbar />
+      <SiteNav />
       <main id="main-content">
         <ContactSalesForm />
       </main>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }
