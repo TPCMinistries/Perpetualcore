@@ -6,8 +6,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
+import { SiteNav } from "@/components/next-site/SiteNav";
+import { SiteFooter } from "@/components/next-site/SiteFooter";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo/structured-data";
 import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
@@ -79,10 +79,10 @@ export default function PostPage() {
           ]),
         ]}
       />
-      <Navbar />
+      <SiteNav />
 
       {/* Hero */}
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
+      <section className="container mx-auto px-6 sm:px-8 pt-36 pb-12 sm:pt-40 sm:pb-16">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-wrap items-baseline gap-3 mb-8 text-muted-foreground">
             <Link
@@ -288,7 +288,7 @@ export default function PostPage() {
           <p>
             And if you're evaluating a new install,{" "}
             <Link
-              href="/products/atlas-discovery"
+              href="/packages"
               className="text-foreground underline hover:no-underline"
             >
               start with discovery
@@ -337,19 +337,19 @@ export default function PostPage() {
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Button asChild className="text-sm font-medium h-10 px-5 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                <Link href="/products/atlas-discovery">
+                <Link href="/packages">
                   Read about Discovery <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 </Link>
               </Button>
               <Button asChild variant="outline" className="text-sm font-medium h-10 px-5 shadow-none rounded-[6px]">
-                <Link href="/contact-sales?plan=exploring">Talk to sales</Link>
+                <Link href="/packages">Talk to sales</Link>
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

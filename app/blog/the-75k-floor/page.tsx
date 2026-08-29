@@ -6,8 +6,8 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
+import { SiteNav } from "@/components/next-site/SiteNav";
+import { SiteFooter } from "@/components/next-site/SiteFooter";
 import { JsonLd } from "@/components/seo/JsonLd";
 import { breadcrumbSchema } from "@/lib/seo/structured-data";
 import { NewsletterCapture } from "@/components/landing/NewsletterCapture";
@@ -85,9 +85,9 @@ export default function PostPage() {
           ]),
         ]}
       />
-      <Navbar />
+      <SiteNav />
 
-      <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
+      <section className="container mx-auto px-6 sm:px-8 pt-36 pb-12 sm:pt-40 sm:pb-16">
         <div className="max-w-3xl mx-auto">
           <div className="flex flex-wrap items-baseline gap-3 mb-8 text-muted-foreground">
             <Link href="/blog" className="font-mono text-[10px] uppercase tracking-[0.22em] hover:text-foreground transition">
@@ -231,7 +231,7 @@ export default function PostPage() {
         </div>
       </section>
 
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

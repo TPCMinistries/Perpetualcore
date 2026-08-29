@@ -25,8 +25,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
+import { SiteNav } from "@/components/next-site/SiteNav";
+import { SiteFooter } from "@/components/next-site/SiteFooter";
 
 type SubmitState = "idle" | "submitting" | "success" | "error";
 
@@ -153,7 +153,7 @@ function PackageIntakeForm() {
 
   if (submitState === "success") {
     return (
-      <section className="container mx-auto px-6 py-24 sm:px-8 sm:py-32">
+      <section className="container mx-auto px-6 pt-40 pb-24 sm:px-8 sm:pt-44 sm:pb-32">
         <div className="mx-auto max-w-2xl text-center">
           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
             <CheckCircle2 className="h-6 w-6" />
@@ -184,7 +184,7 @@ function PackageIntakeForm() {
 
   return (
     <>
-      <section className="container mx-auto px-6 pb-12 pt-20 sm:px-8 sm:pb-16 sm:pt-28">
+      <section className="container mx-auto px-6 pb-12 pt-40 sm:px-8 sm:pb-16 sm:pt-44">
         <div className="grid gap-12 lg:grid-cols-[280px_1fr] lg:gap-20">
           <div>
             <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
@@ -397,7 +397,7 @@ function PackageIntakeForm() {
 }
 
 const fallback = (
-  <section className="container mx-auto px-6 py-24 text-center sm:px-8">
+  <section className="container mx-auto px-6 pt-40 pb-24 text-center sm:px-8">
     <p className="font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
       Loading intake...
     </p>
@@ -407,11 +407,11 @@ const fallback = (
 export default function PackageIntakePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
+      <SiteNav />
       <Suspense fallback={fallback}>
         <PackageIntakeForm />
       </Suspense>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ArrowRight, Check, ClipboardList, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/landing/Navbar";
-import { Footer } from "@/components/landing/Footer";
+import { SiteNav } from "@/components/next-site/SiteNav";
+import { SiteFooter } from "@/components/next-site/SiteFooter";
 
 export const metadata = {
   title: "Package Purchased — Perpetual Core",
@@ -36,8 +36,8 @@ export default function PackageSuccessPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <section className="container mx-auto px-6 sm:px-8 py-24 sm:py-32">
+      <SiteNav />
+      <section className="container mx-auto px-6 sm:px-8 pt-40 pb-24 sm:pt-44 sm:pb-32">
         <div className="grid gap-12 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="max-w-2xl">
           <div className="flex items-center gap-3 mb-8">
@@ -106,7 +106,7 @@ export default function PackageSuccessPage({
         </aside>
         </div>
       </section>
-      <Footer />
+      <SiteFooter />
     </div>
   );
 }

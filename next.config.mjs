@@ -129,7 +129,7 @@ const nextConfig = {
       {
         // Legacy "Transformation Stack" page → studio engagements
         source: "/consulting",
-        destination: "/studio/engagements",
+        destination: "/studio",
         permanent: true,
       },
       {
@@ -144,7 +144,7 @@ const nextConfig = {
         // (Session 2 built /studio/process; redirect now points to its
         // canonical destination.)
         source: "/consultation",
-        destination: "/studio/process",
+        destination: "/contact-sales",
         permanent: true,
       },
       {
@@ -158,6 +158,29 @@ const nextConfig = {
         destination: "/rfp",
         permanent: true,
       },
+      // Consolidate the retired public-site architecture into the new buyer
+      // journey. These routes remain valid for old links and search traffic,
+      // but no longer drop visitors into the legacy visual system.
+      { source: "/studio/process", destination: "/studio", permanent: true },
+      { source: "/studio/methodology", destination: "/studio", permanent: true },
+      { source: "/studio/engagements", destination: "/studio", permanent: true },
+      { source: "/studio/retainers", destination: "/studio", permanent: true },
+      { source: "/studio/case-studies", destination: "/studio", permanent: true },
+      { source: "/solutions", destination: "/studio", permanent: true },
+      { source: "/solutions/:path*", destination: "/studio", permanent: true },
+      { source: "/products/:path*", destination: "/marketplace", permanent: true },
+      { source: "/engine", destination: "/marketplace", permanent: true },
+      { source: "/engine/:path*", destination: "/marketplace", permanent: true },
+      { source: "/features", destination: "/marketplace", permanent: true },
+      { source: "/features/:path*", destination: "/marketplace", permanent: true },
+      { source: "/compare", destination: "/studio", permanent: true },
+      { source: "/compare/:path*", destination: "/studio", permanent: true },
+      { source: "/professional-services", destination: "/studio", permanent: true },
+      { source: "/enterprise-demo", destination: "/contact-sales", permanent: true },
+      { source: "/start", destination: "/packages", permanent: true },
+      { source: "/fund", destination: "/about", permanent: true },
+      { source: "/institute", destination: "/about", permanent: true },
+      { source: "/partners", destination: "/about", permanent: true },
       {
         // Branded entry point for the DBNA Ops client platform
         // (Perpetual Core services build, separate Vercel app).
