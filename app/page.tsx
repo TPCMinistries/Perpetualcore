@@ -16,7 +16,7 @@ const lanes = [
 export default function HomePage() {
   return <div className="min-h-screen bg-[#f3f1ea] text-[#12151c]">
     <SiteNav />
-    <main>
+    <main id="main-content">
       <section className="px-5 pb-16 pt-28 sm:px-8 sm:pb-24 sm:pt-36">
         <div className="mx-auto grid max-w-[1500px] gap-10 lg:grid-cols-[.88fr_1.12fr] lg:items-center lg:gap-14">
           <Reveal className="relative z-10">

@@ -408,9 +408,11 @@ export default function PackageIntakePage() {
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
+      <main id="main-content">
       <Suspense fallback={fallback}>
         <PackageIntakeForm />
       </Suspense>
+      </main>
       <SiteFooter />
     </div>
   );

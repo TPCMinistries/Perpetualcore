@@ -37,6 +37,7 @@ export default function PackageSuccessPage({
   return (
     <div className="min-h-screen bg-background">
       <SiteNav />
+      <main id="main-content">
       <section className="container mx-auto px-6 sm:px-8 pt-40 pb-24 sm:pt-44 sm:pb-32">
         <div className="grid gap-12 lg:grid-cols-[1fr_360px] lg:items-start">
         <div className="max-w-2xl">
@@ -106,6 +107,7 @@ export default function PackageSuccessPage({
         </aside>
         </div>
       </section>
+      </main>
       <SiteFooter />
     </div>
   );

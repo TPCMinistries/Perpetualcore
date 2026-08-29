@@ -107,7 +107,7 @@ export default function PostPage() {
       </section>
 
       {/* Body */}
-      <article className="container mx-auto px-6 sm:px-8 pb-20">
+      <article id="main-content" className="container mx-auto px-6 sm:px-8 pb-20">
         <div className="max-w-2xl mx-auto prose-content">
           <p>
             The most common question I get on a first sales call isn't{" "}
