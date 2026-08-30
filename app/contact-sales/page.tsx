@@ -94,6 +94,35 @@ const INTAKE_PROMPTS = [
   },
 ];
 
+const OFFER_CONTEXT = {
+  "operating-system-map": {
+    name: "Operating System Map",
+    eyebrow: "Start with the map",
+    headline: "Map the first operating result worth buying.",
+    description:
+      "We’ll identify the workflow, economics, authority boundaries, and 90-day sequence before you commit to a larger build.",
+    submitLabel: "Request the Operating System Map",
+  },
+  "workflow-proof-sprint": {
+    name: "Workflow Proof Sprint",
+    eyebrow: "Prove one workflow",
+    headline: "Scope one workflow that can earn expansion.",
+    description:
+      "Bring the recurring workflow, its owner, and the business consequence. We’ll define the production boundary and proof-of-value plan together.",
+    submitLabel: "Request a Sprint Scope",
+  },
+  "managed-operating-lane": {
+    name: "Managed Operating Lane",
+    eyebrow: "Operate the lane",
+    headline: "Design the operating lane your team needs maintained.",
+    description:
+      "We’ll define the lane, monthly capacity, approval rules, reporting cadence, and the first 90-day operating term.",
+    submitLabel: "Request a Lane Design",
+  },
+} as const;
+
+type OfferIntent = keyof typeof OFFER_CONTEXT;
+
 function SectionRail({ index, label }: { index: string; label: string }) {
   return (
     <div className="flex items-baseline gap-3 text-muted-foreground">
@@ -121,6 +150,10 @@ function ContactSalesForm() {
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
   const isPostPaymentIntake = requestContext.intent === "post-payment-intake";
   const isManualInvoice = requestContext.intent === "manual-invoice";
+  const offer =
+    requestContext.intent in OFFER_CONTEXT
+      ? OFFER_CONTEXT[requestContext.intent as OfferIntent]
+      : null;
 
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
@@ -128,8 +161,9 @@ function ContactSalesForm() {
     const product = searchParams.get("product") || "";
     const intent = searchParams.get("intent") || "";
     const sessionId = searchParams.get("session_id") || "";
+    const offerProduct = intent in OFFER_CONTEXT ? intent : product;
 
-    setRequestContext({ product, intent });
+    setRequestContext({ product: offerProduct, intent });
     setFormData((current) => ({
       ...current,
       plan:
@@ -139,7 +173,7 @@ function ContactSalesForm() {
           : intent === "post-payment-intake"
             ? "guided-setup"
             : current.plan),
-      product,
+      product: offerProduct,
       message:
         intent === "post-payment-intake"
           ? `I already completed a Perpetual Core package checkout${sessionId ? ` (${sessionId})` : ""}. Here is the operating context we should use for onboarding: `
@@ -198,6 +232,9 @@ function ContactSalesForm() {
             Got it.
           </h1>
           <p className="mt-6 text-base text-muted-foreground leading-[1.7]">
+            {offer
+              ? `Your ${offer.name} request is now in the review queue. `
+              : "Your inquiry is now in the review queue. "}
             A human on the team reads every submission. We'll reply to{" "}
             <span className="text-foreground font-medium">{formData.email}</span>{" "}
             after review. Our target is one business day.
@@ -220,18 +257,18 @@ function ContactSalesForm() {
       {/* Hero */}
       <section className="container mx-auto px-6 sm:px-8 pt-20 pb-12 sm:pt-28 sm:pb-16">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-20">
-            <SectionRail index="00" label="Map the operating system" />
+          <SectionRail index="00" label={offer?.eyebrow || "Map the operating system"} />
           <div className="max-w-3xl">
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl leading-[1.05] tracking-[-0.025em] text-foreground">
-              Tell us where AI needs to touch the company.
+              {offer?.headline || "Tell us where AI needs to touch the company."}
             </h1>
             <p className="mt-8 text-lg sm:text-xl text-muted-foreground leading-[1.65] max-w-2xl">
               {isPostPaymentIntake
                 ? "Your payment is in. Use this form to send the operating context we need before the first onboarding call."
                 : isManualInvoice
                   ? "Use this form when the buying process needs ACH, procurement review, a custom first payment, or a manual Stripe invoice."
-                : "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility. We can start with one high-leverage workflow, but we scope it with the larger company system in view."}
-              {requestContext.product && (
+                : offer?.description || "Perpetual Core installs AI operating systems across sales, operations, knowledge, customer communication, and leadership visibility. We can start with one high-leverage workflow, but we scope it with the larger company system in view."}
+              {requestContext.product && !offer && (
                 <>
                   {" "}
                   You're asking about{" "}
@@ -393,7 +430,9 @@ function ContactSalesForm() {
                 data-pc-event="marketplace_contact_intent"
                 data-placement="contact-sales-form"
               >
-                {submitState === "submitting" ? "Sending…" : "Map My AI Operating System"}
+                {submitState === "submitting"
+                  ? "Sending…"
+                  : offer?.submitLabel || "Map My AI Operating System"}
                 {submitState !== "submitting" && (
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 )}
