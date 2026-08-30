@@ -143,3 +143,23 @@ revenue, creator counts, or marketplace volume from configured software.
 without reducing it to a consultancy.
 
 **Conversion actions:** Explore the marketplace or map the company.
+
+## Current Commercial Offer Ladder
+
+The public commercial ladder is outcome-led and must remain consistent across
+the website, Revenue Studio, proposals, CRM routing, and delivery operations.
+
+1. **Operating System Map — $7.5K–$15K, 1–2 weeks.** Diagnose the company,
+   choose the first workflow, define economics and authority boundaries, and
+   produce a decision-ready 90-day sequence.
+2. **Workflow Proof Sprint — $30K–$75K, 4–8 weeks.** Install one bounded
+   production workflow with an owner, success measures, approval gates,
+   training, and outcome-review plan.
+3. **Managed Operating Lane — $10K–$35K/month, initial 90-day term.** Operate
+   and improve a named lane with explicit capacity, service boundaries,
+   approval rules, evidence reporting, and monthly expansion decisions.
+
+The Map is the lowest-risk first purchase. A Sprint follows when the workflow
+and proof standard are sufficiently clear. A Managed Lane follows when the
+workflow is strategically important enough to require an ongoing operating
+rhythm. Expansion is earned through evidence; it is never implied or automatic.
