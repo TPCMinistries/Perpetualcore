@@ -185,7 +185,7 @@ function ContactSalesForm() {
     } catch (err) {
       console.error("Contact sales error:", err);
       setSubmitState("error");
-      toast.error("Submit failed. Email lorenzo@perpetualcore.com directly.");
+      toast.error("Submit failed. Email info@perpetualcore.com directly.");
     }
   };
 
@@ -406,8 +406,8 @@ function ContactSalesForm() {
                   className="text-sm font-medium text-red-700"
                 >
                   We couldn’t submit the form. Try again or email{" "}
-                  <a className="underline" href="mailto:lorenzo@perpetualcore.com">
-                    lorenzo@perpetualcore.com
+                  <a className="underline" href="mailto:info@perpetualcore.com">
+                    info@perpetualcore.com
                   </a>
                   .
                 </p>
@@ -449,10 +449,10 @@ function ContactSalesForm() {
                   Or email directly
                 </p>
                 <a
-                  href="mailto:lorenzo@perpetualcore.com"
+                  href="mailto:info@perpetualcore.com"
                   className="text-sm text-foreground hover:text-primary inline-flex items-center"
                 >
-                  lorenzo@perpetualcore.com
+                  info@perpetualcore.com
                   <ArrowRight className="ml-2 h-3 w-3" />
                 </a>
               </div>

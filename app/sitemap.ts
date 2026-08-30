@@ -45,6 +45,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "", priority: 1.0, changeFrequency: "daily" },
     { path: "/features", priority: 0.9, changeFrequency: "weekly" },
     { path: "/pricing", priority: 0.9, changeFrequency: "weekly" },
+    { path: "/offers", priority: 0.9, changeFrequency: "weekly" },
     { path: "/packages", priority: 0.9, changeFrequency: "weekly" },
     { path: "/products", priority: 0.9, changeFrequency: "weekly" },
     { path: "/about", priority: 0.7, changeFrequency: "monthly" },
@@ -83,6 +84,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { path: "/privacy", priority: 0.3, changeFrequency: "yearly" },
     { path: "/terms", priority: 0.3, changeFrequency: "yearly" },
     { path: "/cookies", priority: 0.3, changeFrequency: "yearly" },
+    { path: "/legal", priority: 0.4, changeFrequency: "monthly" },
+    { path: "/legal/acceptable-use", priority: 0.3, changeFrequency: "yearly" },
+    { path: "/legal/ai", priority: 0.4, changeFrequency: "yearly" },
+    { path: "/legal/security", priority: 0.4, changeFrequency: "yearly" },
+    { path: "/legal/accessibility", priority: 0.3, changeFrequency: "yearly" },
   ];
 
   const studioPages: Page[] = [
