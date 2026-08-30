@@ -27,6 +27,7 @@ const FOOTER_GROUPS = [
     title: "Resources",
     links: [
       { label: "Buyer’s guide", href: "/guide/ai-implementation-buyers-guide" },
+      { label: "Offers", href: "/offers" },
       { label: "Pricing", href: "/pricing" },
       { label: "Help", href: "/help" },
       { label: "Contact", href: "/contact-sales" },
@@ -140,6 +141,12 @@ export function Footer({ tone = "light" }: { tone?: "light" | "dark" }) {
               className={cn("inline-flex min-h-6 items-center", dark ? "hover:text-white" : "hover:text-[#25252b]")}
             >
               Cookies
+            </Link>
+            <Link
+              href="/legal"
+              className={cn("inline-flex min-h-6 items-center", dark ? "hover:text-white" : "hover:text-[#25252b]")}
+            >
+              Legal & Trust
             </Link>
           </div>
           <a
