@@ -9,7 +9,7 @@ export const metadata = { title: "Perpetual Core — Institutional systems, buil
 
 const lanes = [
   ["01", "USE A LIVE PRODUCT", "Explore the systems", "Choose Sage, RFP Engine, Sentinel, or Janice by the operating problem you need to solve.", "/marketplace", "#d7ff3f"],
-  ["02", "FIX ONE BROKEN WORKFLOW", "Work with the Studio", "Map one costly handoff, install the smallest useful system, and measure whether it deserves expansion.", "/studio", "#2457ff"],
+  ["02", "FIX ONE BROKEN WORKFLOW", "Choose an engagement", "Map one costly handoff, install the smallest useful system, and measure whether it deserves expansion.", "/offers", "#2457ff"],
   ["03", "EXPLORE A FOCUSED COMPANY", "See Kept Count", "See how the operating model becomes a dedicated company when a market requires deeper workflow, evidence, and governance.", "https://keptcount.com", "#ff6338"],
 ] as const;
 
@@ -23,7 +23,7 @@ export default function HomePage() {
             <div className="inline-flex items-center gap-3 rounded-full border border-black/10 bg-white/60 px-3 py-2 text-[10px] font-black tracking-[.14em]"><span className="h-2 w-2 rounded-full bg-[#2457ff]" /> AI OPERATING SYSTEMS / HUMAN AUTHORITY</div>
             <h1 className="mt-8 max-w-[820px] text-[clamp(3.15rem,6.6vw,6.8rem)] font-black leading-[.84] tracking-[-.072em]">KEEP CRITICAL WORK <span className="text-[#2457ff]">MOVING.</span></h1>
             <p className="mt-8 max-w-2xl text-lg font-medium leading-8 text-[#565c68] sm:text-xl">Perpetual Core builds AI systems for organizations where lost context, weak handoffs, and invisible decisions carry real consequences.</p>
-            <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/marketplace" className="inline-flex min-h-14 items-center justify-center rounded-[14px] bg-[#2457ff] px-6 text-sm font-black text-white transition-colors hover:bg-[#173ed4]">Find the right system <ArrowRight className="ml-2 h-4 w-4" /></Link><Link href="/packages" className="inline-flex min-h-14 items-center justify-center rounded-[14px] border border-black/15 px-6 text-sm font-black hover:bg-white/60">See prices and starting points <CornerDownRight className="ml-2 h-4 w-4" /></Link></div>
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row"><Link href="/marketplace" className="inline-flex min-h-14 items-center justify-center rounded-[14px] bg-[#2457ff] px-6 text-sm font-black text-white transition-colors hover:bg-[#173ed4]">Find the right system <ArrowRight className="ml-2 h-4 w-4" /></Link><Link href="/offers" className="inline-flex min-h-14 items-center justify-center rounded-[14px] border border-black/15 px-6 text-sm font-black hover:bg-white/60">Choose a starting point <CornerDownRight className="ml-2 h-4 w-4" /></Link></div>
             <div className="mt-12 border-t border-black/10 pt-5"><p className="text-[10px] font-black uppercase tracking-[.15em] text-[#747985]">Built for recurring work across</p><div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs font-bold text-[#565c68]"><span>OPPORTUNITY</span><span className="h-1 w-1 rounded-full bg-black/25"/><span>KNOWLEDGE</span><span className="h-1 w-1 rounded-full bg-black/25"/><span>DILIGENCE</span><span className="h-1 w-1 rounded-full bg-black/25"/><span>PEOPLE</span></div></div>
           </Reveal>
           <SystemField />
