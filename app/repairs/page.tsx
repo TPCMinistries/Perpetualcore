@@ -53,7 +53,7 @@ export default function RepairsPage() {
       </section>
       <section id="repair-brief" className="scroll-mt-24 border-t border-border py-16 sm:py-20">
         <div className="container mx-auto grid gap-10 px-6 sm:px-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-20">
-          <div><p className="eyebrow mb-5">Start here</p><h2 id="brief-title" className="text-3xl sm:text-4xl font-semibold tracking-tight">Tell us where it breaks.</h2><p className="mt-5 text-muted-foreground leading-relaxed">Prepare a short email to Lorenzo at Perpetual Core. An accurate description helps us decide whether this focused repair is the right fit.</p><p className="mt-6 text-sm leading-relaxed text-muted-foreground">We use AI-assisted engineering for diagnosis, implementation and testing. Each engagement still needs access, defined acceptance checks and evidence that the affected flow works.</p></div>
+          <div><p className="eyebrow mb-5">Start here</p><h2 id="brief-title" className="text-3xl sm:text-4xl font-semibold tracking-tight">Tell us where it breaks.</h2><p className="mt-5 text-muted-foreground leading-relaxed">Prepare a short email to Perpetual Core. An accurate description helps us decide whether this focused repair is the right fit.</p><p className="mt-6 text-sm leading-relaxed text-muted-foreground">We use AI-assisted engineering for diagnosis, implementation and testing. Each engagement still needs access, defined acceptance checks and evidence that the affected flow works.</p></div>
           <RepairBrief />
         </div>
       </section>

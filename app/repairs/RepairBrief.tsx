@@ -42,7 +42,7 @@ export function RepairBrief() {
     if (!valid()) return;
     try {
       await navigator.clipboard.writeText(formatBrief(brief));
-      setStatus("Brief copied. Paste it into an email to lorenzo@perpetualcore.com. Nothing has been sent.");
+      setStatus("Brief copied. Paste it into an email to info@perpetualcore.com. Nothing has been sent.");
     } catch {
       setStatus("Copy was unavailable. Download the text brief or open an email draft instead.");
     }
@@ -98,7 +98,7 @@ export function RepairBrief() {
         <Button type="button" variant="outline" className="h-11" onClick={copy}>Copy brief</Button>
         <Button type="button" variant="ghost" className="h-11" onClick={download}>Download text</Button>
       </div>
-      <p className="text-sm text-muted-foreground">Send the draft in your email app; nothing is submitted here. Recipient: lorenzo@perpetualcore.com. This is a scope request, not a purchase.</p>
+      <p className="text-sm text-muted-foreground">Send the draft in your email app; nothing is submitted here. Recipient: info@perpetualcore.com. This is a scope request, not a purchase.</p>
       <p role="status" aria-live="polite" aria-atomic="true" className="min-h-6 text-sm font-medium">{status}</p>
     </form>
   );

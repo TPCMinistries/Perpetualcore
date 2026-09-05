@@ -17,7 +17,7 @@ describe("repair brief boundary", () => {
   it("encodes body contents as data rather than email header parameters", () => {
     const brief = { ...valid, actual: "&bcc=other@example.com # % ?\nUnicode: café" };
     const url = new URL(briefMailto(brief));
-    expect(url.pathname).toBe("lorenzo@perpetualcore.com");
+    expect(url.pathname).toBe("info@perpetualcore.com");
     expect([...url.searchParams.keys()]).toEqual(["subject", "body"]);
     expect(url.searchParams.get("body")).toBe(formatBrief(brief));
     expect(url.searchParams.get("body")).toContain("No purchase or delivery commitment");

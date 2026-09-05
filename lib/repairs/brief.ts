@@ -42,5 +42,5 @@ export function formatBrief(brief: RepairBrief): string {
 
 export function briefMailto(brief: RepairBrief): string {
   const subject = `Repair scope request — ${brief.category}`;
-  return `mailto:lorenzo@perpetualcore.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(formatBrief(brief))}`;
+  return `mailto:info@perpetualcore.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(formatBrief(brief))}`;
 }

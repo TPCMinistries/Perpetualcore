@@ -10,7 +10,7 @@ Use a free initial scope review to determine fit; it is not free implementation.
 
 ## Acquisition and intake
 
-The /repairs page prepares a brief locally and opens the visitor's email app addressed to the existing published contact, lorenzo@perpetualcore.com. It does not submit a lead, upload a file, charge a card or claim delivery. Copy/download provide a fallback if the visitor has no mail handler. Mailbox access and inbound receipt still need verification before the campaign begins.
+The /repairs page prepares a brief locally and opens the visitor's email app addressed to the owner-designated commercial mailbox, info@perpetualcore.com. It does not submit a lead, upload a file, charge a card or claim delivery. Copy/download provide a fallback if the visitor has no mail handler. Authenticated mailbox access is verified; inbound receipt still needs a delivery test before the campaign begins. Gmail lists billing@, hello@, lorenzo@ and sales@perpetualcore.com as configured send-as addresses. Keep info@ as intake, sales@ for sales correspondence, and billing@ for invoices after the relevant delivery path is tested.
 
 Use one commercial sender and a monitored reply channel. Prioritize direct requests for one defect; answer through the original marketplace where applicable. Check whether the buyer is still hiring and whether proposal credits cost money. The incremental spending limit remains $0. Never submit unverified portfolio claims. A real prior software project is capability evidence, not evidence of paid repair customers.
 
@@ -34,6 +34,8 @@ Fill every bracket from actual evidence before sending. If diagnosis shows the w
 6. Record customer acceptance separately from payment. An invoice, checkout return or proposal is not settled revenue. Verify the provider receipt before reporting collected cash.
 
 ## Payment preparation
+
+The owner designated Mercury as the receiving bank. The authenticated Mercury workspace is The Perpetual Core. The owner supplied receiving-account details, matching the checking account shown in that workspace. Native invoicing is available. Full banking details stay in the bank; no bank configuration or money movement has occurred.
 
 Proposed one-time line item: `Perpetual Core — scoped workflow/software repair`; currency USD; amount 30000 cents; quantity 1; no recurring interval. Description must identify the agreed scope. Do not create a broad public pay-now link that accepts unreviewed jobs.
 

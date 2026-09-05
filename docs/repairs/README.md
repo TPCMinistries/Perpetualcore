@@ -10,7 +10,7 @@ September 5, 2026. Isolated branch: `codex/repair-service-setup-20260905`, based
 - [Operating runbook](OPERATING_RUNBOOK.md): qualification, scope confirmation, delivery, acceptance, payment evidence and operating diagnosis.
 - [Setup receipt](setup-status.json): verified checks and outstanding account dependencies.
 
-The browser opens drafts to the site's existing published address, `lorenzo@perpetualcore.com`. Opening a draft does not send it. Commercial inbox access is not yet verified. No application, provider or payment configuration was changed.
+The browser opens drafts to the owner-designated commercial mailbox, `info@perpetualcore.com`. Opening a draft does not send it. Its authenticated Google Workspace session and configured send-as addresses were verified: billing@, hello@, lorenzo@ and sales@perpetualcore.com. The default is info@; replies use the original recipient address. End-to-end delivery remains untested. No provider or payment configuration was changed.
 
 ## Validation
 
@@ -30,6 +30,6 @@ Local review URL while the development server runs: `http://127.0.0.1:3197/repai
 
 ## Next operating step
 
-Confirm/access the commercial inbox and intended Stripe merchant. The existing sending domains are verified. The live Stripe account checked has charges/payouts enabled but a LorenzoDC business profile; no new payment objects were created. Save the offer in the authenticated Revenue Studio workspace once browser access works, then run one authorized inbound/sending receipt check and a specifically scoped buyer conversation. Payment follows accepted scope. No unattended operator or campaign is running.
+Use the verified info@ mailbox for commercial operations. The owner designated Mercury as the receiving bank; its authenticated workspace is The Perpetual Core and the owner supplied receiving-account details. This does not establish or change Stripe payout routing. Verify the intended merchant before issuing payment requests. The existing sending domains are verified. The live Stripe account checked has charges/payouts enabled but a LorenzoDC business profile; no new payment objects were created. Save the offer in the authenticated Revenue Studio workspace once browser access works, then run one authorized inbound/sending receipt check and a specifically scoped buyer conversation. Payment follows accepted scope. No unattended operator or campaign is running.
 
 This adds only a new route, helper, tests, inspector and documents. Shared intake, database, auth, existing prices, navigation and other products are unchanged.
