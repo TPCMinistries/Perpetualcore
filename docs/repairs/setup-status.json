@@ -1,0 +1,19 @@
+{
+  "asOf": "2026-09-05",
+  "offer": { "currency": "USD", "amountCents": 30000, "billing": "one-time-after-scope-confirmation", "activeCustomerLimit": 1 },
+  "incrementalSpendLimitUsd": 0,
+  "sourceBranch": "codex/repair-service-setup-20260905",
+  "baseCommit": "5493549",
+  "revenueStudio": "browser control timed out; no offer persisted this turn",
+  "intake": "implemented client-side email brief with copy/download fallbacks; no backend submission",
+  "emailDomains": { "perpetualcore.com": "verified via read-only Resend API", "mail.perpetualcore.com": "verified via read-only Resend API" },
+  "commercialMailboxAccess": "not verified",
+  "stripe": { "mode": "live", "chargesEnabled": true, "payoutsEnabled": true, "profile": "Lorenzo Daughtry Chambers / lorenzodc.com", "merchantForThisOffer": "needs confirmation", "newObjectsCreated": 0 },
+  "customerRepairs": 0,
+  "outreachSent": 0,
+  "newSpendUsd": 0,
+  "verifiedRevenueUsd": 0,
+  "unattendedOperation": false,
+  "checks": { "focusedTests": "6 passed", "scopedTypeScript": "passed", "scopedLint": "passed", "staticExportInspector": "passed", "nextLocalHttp": "200 with offer and brief rendered", "visualBrowserCheck": "unavailable; browser control timed out" },
+  "productionRelease": "not deployed"
+}
