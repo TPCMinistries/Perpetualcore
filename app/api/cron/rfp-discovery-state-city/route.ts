@@ -27,8 +27,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import {
+  isStateCityIngestSource,
   runStateCityIngest,
   type StateCityIngestResult,
+  type StateCitySourceName,
 } from "@/lib/rfp/ingest/run-state-city";
 import { scoreNewOpportunitiesForAllActiveOrgs } from "@/lib/rfp/scoring/recompute";
 import { logRfpCronExecution } from "@/lib/rfp/cron-log";
@@ -49,11 +51,54 @@ function isAuthorized(request: NextRequest): boolean {
   return Boolean(expected && authHeader === `Bearer ${expected}`);
 }
 
-async function runCron(): Promise<NextResponse> {
+/**
+ * Optional `?source=a,b` scoping so vercel.json can stagger heavy sources
+ * (NYS Contract Reporter pages ~35 requests; CA grants upserts ~2,000 rows)
+ * into separate invocations that each stay well under the 300s ceiling.
+ * No param = run every scraper (manual / legacy behaviour).
+ */
+function parseRequestedSources(request: NextRequest): {
+  rawSources: string[];
+  validSources: StateCitySourceName[];
+  invalidSources: string[];
+} {
+  const raw =
+    request.nextUrl.searchParams.get("source") ??
+    request.nextUrl.searchParams.get("sources") ??
+    "";
+  const rawSources = raw
+    .split(",")
+    .map((source) => source.trim())
+    .filter(Boolean);
+  const validSources: StateCitySourceName[] = [];
+  const invalidSources: string[] = [];
+  for (const source of rawSources) {
+    if (isStateCityIngestSource(source)) validSources.push(source);
+    else invalidSources.push(source);
+  }
+  return { rawSources, validSources: [...new Set(validSources)], invalidSources };
+}
+
+async function runCron(request: NextRequest): Promise<NextResponse> {
   const startedAt = Date.now();
+  const { rawSources, validSources, invalidSources } =
+    parseRequestedSources(request);
 
   try {
-    const results = await runStateCityIngest();
+    if (invalidSources.length > 0) {
+      return NextResponse.json(
+        {
+          ok: false,
+          error: "Invalid state/city source",
+          invalid_sources: invalidSources,
+        },
+        { status: 400 }
+      );
+    }
+
+    const results = await runStateCityIngest({
+      sources: validSources.length > 0 ? validSources : undefined,
+    });
     const totals = results.reduce<IngestTotals>(
       (acc: IngestTotals, r: StateCityIngestResult) => {
         acc.fetched += r.fetched;
@@ -97,6 +142,7 @@ async function runCron(): Promise<NextResponse> {
         total_fetched: totals.fetched,
         total_upserted: totals.upserted,
         total_errors: totals.errors,
+        requested_sources: rawSources.length > 0 ? rawSources : null,
         scoring_candidates: scoringCandidateIds.length,
         scored: "scored" in scored ? scored.scored : null,
         scoring_error: "error" in scored ? scored.error.slice(0, 200) : null,
@@ -129,6 +175,7 @@ async function runCron(): Promise<NextResponse> {
       results,
       totals,
       scored,
+      requested_sources: rawSources.length > 0 ? rawSources : null,
       warning:
         completedWithoutErrors
           ? null
@@ -161,11 +208,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!isAuthorized(request)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  return runCron();
+  return runCron(request);
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
-  if (isAuthorized(request)) return runCron();
+  if (isAuthorized(request)) return runCron(request);
   return new NextResponse(
     JSON.stringify({ error: "Method not allowed. Use authenticated GET or POST." }),
     {

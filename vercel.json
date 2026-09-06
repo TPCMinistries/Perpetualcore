@@ -149,8 +149,12 @@
       "schedule": "28 6 * * *"
     },
     {
-      "path": "/api/cron/rfp-discovery-state-city",
-      "schedule": "30 6 * * *"
+      "schedule": "30 6 * * *",
+      "path": "/api/cron/rfp-discovery-state-city?source=ny_state,nyc_dycd,nyc_hra,nyc_doe,ca_grants,nj_grants,ct_grants,pa_grants"
+    },
+    {
+      "schedule": "36 6 * * *",
+      "path": "/api/cron/rfp-discovery-state-city?source=nyc_cityrecord,nys_contract_reporter"
     },
     {
       "path": "/api/cron/rfp-discovery-curated",
