@@ -20,7 +20,9 @@ export type StateCitySourceName =
   | "ca_grants"
   | "nj_grants"
   | "ct_grants"
-  | "pa_grants";
+  | "pa_grants"
+  | "nyc_cityrecord"
+  | "nys_contract_reporter";
 
 export interface OpportunityInput {
   /** Source key — must be one of the values allowed by rfp_opportunities_source_check. */

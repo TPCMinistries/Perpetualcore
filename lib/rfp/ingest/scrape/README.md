@@ -17,6 +17,8 @@ If a source migrates to a JavaScript-rendered SPA, the corresponding scraper fil
 | NYC HRA | `nyc_hra` | `https://www.nyc.gov/site/hra/about/contracting-procurement.page` | GET, no auth | Table-row + anchor fallback (HRA links many opps to PASSPort, login-walled) | 2026-05-10 | 5–15 active |
 | NYC DOE | `nyc_doe` | `https://www.nyc.gov/site/doe/funding/contract-opportunities.page` | GET, no auth | Table-row + anchor fallback | 2026-05-10 | 5–25 active |
 | Connecticut CTsource | `ct_grants` | `https://portal.ct.gov/das/ctsource/bidboard` | GET JSON, no auth | CTsource/Proactis public bid-board search endpoint, Open status only, paginated to 250 records | 2026-06-17 | ~215 open |
+| NYC City Record Online | `nyc_cityrecord` | `https://data.cityofnewyork.us/resource/dg92-zbpx.json` | GET JSON (Socrata SODA), no auth | `section_name=Procurement`, `type_of_notice_description=Solicitation`, `due_date > now`; deep-links `a856-cityrecord.nyc.gov/RequestDetail/{request_id}` | 2026-09-06 | ~200–250 open |
+| NYS Contract Reporter | `nys_contract_reporter` | `https://www.nyscr.ny.gov/Ads/Search?Skip=N` | GET, no auth, 25/page, ≤40 pages @ 1 req/s | `div.opp-list-item[data-ad-id]` blocks; label/value pairs (CR#, Agency, Division, Issue date, Due date, Location, Category, Ad type); detail pages login-walled | 2026-09-06 | ~800 open |
 | Pennsylvania eMarketplace | `pa_grants` | `https://www.emarketplace.state.pa.us/Search.aspx` | GET, no auth | Current solicitations grid, page 1 only; ASP.NET all-rows postback needs hardening | 2026-06-17 | 10 active on page 1 |
 
 ## Throttling

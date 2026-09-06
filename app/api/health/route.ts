@@ -142,8 +142,11 @@ function checkMemory(): CheckResult {
   const heapTotalMB = Math.round(memUsage.heapTotal / 1024 / 1024);
   const usagePercent = Math.round((memUsage.heapUsed / memUsage.heapTotal) * 100);
 
-  // Warn if memory usage is high (> 85%)
-  if (usagePercent > 85) {
+  // Warn only when a genuinely large heap is saturated. On Vercel a cold
+  // function reports e.g. 65MB / 67MB (97%) at rest, which is normal V8
+  // heap growth, not pressure — flagging it kept /api/health "degraded".
+  const LARGE_HEAP_MB = 256;
+  if (usagePercent > 90 && heapTotalMB >= LARGE_HEAP_MB) {
     return {
       status: "warn",
       message: `High memory usage: ${heapUsedMB}MB / ${heapTotalMB}MB (${usagePercent}%)`,

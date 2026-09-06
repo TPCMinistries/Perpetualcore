@@ -6,7 +6,11 @@
  * Window:   postedFrom/postedTo (mm/dd/yyyy)
  *
  * When SAM_GOV_API_KEY is unset (re-registration pending), this fetcher
- * returns [] and logs a [skip] line. NEVER throws.
+ * returns [] and logs a [skip] line. When the key is present but SAM.gov
+ * REJECTS it (401/403 — expired or revoked), the fetcher THROWS so the
+ * orchestrator records a per-source error, the cron logs "warning", and the
+ * failure is visible instead of reading as a quiet empty day. All other
+ * failures still degrade to [].
  *
  * Rate limit: 1,000 requests/day on the free tier — we cap at 200 records
  * per run (2 paginated pages of 100) to stay well below.
@@ -101,6 +105,14 @@ export async function fetchSamGovOpportunities(
     } catch (err) {
       console.error("[error] sam_gov: network error", err);
       break;
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(
+        `SAM.gov rejected SAM_GOV_API_KEY (HTTP ${res.status}). The key has expired or was revoked — ` +
+          "generate a new key at sam.gov (Profile → API Key), update SAM_GOV_API_KEY in Vercel production, " +
+          "and set rfp_api_key_health.expires_at to the new 90-day expiry."
+      );
     }
 
     if (!res.ok) {

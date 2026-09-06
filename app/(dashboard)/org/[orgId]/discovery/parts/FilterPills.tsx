@@ -63,6 +63,8 @@ const SOURCE_OPTIONS: Array<{ key: string; label: string }> = [
   { key: "nyc_hra", label: "NYC HRA" },
   { key: "nyc_doe", label: "NYC DOE" },
   { key: "nyc_passport", label: "NYC PASSPort" },
+  { key: "nyc_cityrecord", label: "NYC City Record" },
+  { key: "nys_contract_reporter", label: "NYS Contract Reporter" },
   { key: "ca_grants", label: "CA Grants" },
   { key: "nj_grants", label: "NJ Grants" },
   { key: "ct_grants", label: "CT Grants" },

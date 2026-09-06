@@ -37,6 +37,8 @@ export type RfpOpportunitySource =
   | "nyc_hra"
   | "nyc_doe"
   | "nyc_passport"
+  | "nyc_cityrecord"
+  | "nys_contract_reporter"
   | "ca_grants"
   | "nj_grants"
   | "ct_grants"
@@ -74,6 +76,8 @@ export const RFP_ALLOWED_OPPORTUNITY_SOURCES: RfpOpportunitySource[] = [
   "nyc_hra",
   "nyc_doe",
   "nyc_passport",
+  "nyc_cityrecord",
+  "nys_contract_reporter",
   "ca_grants",
   "nj_grants",
   "ct_grants",
@@ -227,6 +231,32 @@ export const RFP_SOURCE_CATALOG: RfpSourceCatalogEntry[] = [
     targetIndexedEstimate: 12_000,
     canonicalUrl: "https://passport.cityofnewyork.us",
     nextStep: "Stabilize source coverage and duplicate matching.",
+  },
+  {
+    source: "nyc_cityrecord",
+    label: "NYC City Record",
+    category: "city",
+    status: "live",
+    priority: "p0",
+    ingestMode: "api",
+    geography: "NYC",
+    targetScale: "Every NYC agency procurement solicitation (City Record Online via NYC Open Data dg92-zbpx)",
+    targetIndexedEstimate: 3_000,
+    canonicalUrl: "https://a856-cityrecord.nyc.gov",
+    nextStep: "Watch for dataset field renames; dedupe against PASSPort EPINs.",
+  },
+  {
+    source: "nys_contract_reporter",
+    label: "NYS Contract Reporter",
+    category: "state",
+    status: "live",
+    priority: "p0",
+    ingestMode: "html_scrape",
+    geography: "NY",
+    targetScale: "Every NYS agency, authority, SUNY/CUNY and county procurement ad >= $50K",
+    targetIndexedEstimate: 8_000,
+    canonicalUrl: "https://www.nyscr.ny.gov",
+    nextStep: "Detail pages are login-walled; list fields only. Add category filters per org profile.",
   },
   {
     source: "ca_grants",

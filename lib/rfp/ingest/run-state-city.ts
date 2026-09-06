@@ -29,6 +29,8 @@ import { fetchCaGrantOpportunities } from "./scrape/ca-grants";
 import { fetchNjStartOpportunities } from "./scrape/nj-start";
 import { fetchCtCtsourceOpportunities } from "./scrape/ct-ctsource";
 import { fetchPaEMarketplaceOpportunities } from "./scrape/pa-emarketplace";
+import { fetchNycCityRecordOpportunities } from "./scrape/nyc-cityrecord";
+import { fetchNysContractReporterOpportunities } from "./scrape/nys-contract-reporter";
 import {
   getRollingBaseline,
   recordBaseline,
@@ -62,6 +64,13 @@ const SCRAPERS: Array<{
   { source: "nj_grants", fetch: fetchNjStartOpportunities },
   { source: "ct_grants", fetch: fetchCtCtsourceOpportunities },
   { source: "pa_grants", fetch: fetchPaEMarketplaceOpportunities },
+  // Canonical NYC + NYS feeds (added 2026-09-06). The PASSPort-based per-agency
+  // scrapers above only see PASSPort page 1; these two carry the real volume.
+  { source: "nyc_cityrecord", fetch: fetchNycCityRecordOpportunities },
+  {
+    source: "nys_contract_reporter",
+    fetch: fetchNysContractReporterOpportunities,
+  },
 ];
 
 export function isStateCityIngestSource(

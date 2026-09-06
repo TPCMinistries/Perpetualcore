@@ -46,6 +46,12 @@ export interface SocrataSourceConfig {
   limit?: number;
   /** ISO date "now" override for testing. */
   now?: string;
+  /**
+   * Deep-link template when the dataset carries no URL column, e.g.
+   * "https://a856-cityrecord.nyc.gov/RequestDetail/{source_id}".
+   * `{source_id}` is replaced with the row's mapped source_id.
+   */
+  url_template?: string;
 }
 
 function stripHtml(s: string): string {
@@ -115,7 +121,11 @@ export async function fetchSocrata(
       brief: briefRaw ? stripHtml(briefRaw).slice(0, 500) : null,
       keywords: extractTitleKeywords(title),
       geo: cfg.geo ?? null,
-      url: pick(r, fm.url),
+      url:
+        pick(r, fm.url) ??
+        (cfg.url_template
+          ? cfg.url_template.replace("{source_id}", encodeURIComponent(source_id))
+          : null),
       needs_review: false,
       raw_json: r,
     });

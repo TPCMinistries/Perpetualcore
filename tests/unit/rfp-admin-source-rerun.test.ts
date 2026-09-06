@@ -24,6 +24,10 @@ describe("RFP admin source rerun", () => {
     // so it is manually rerunnable now.
     expect(isStateCityIngestSource("nj_grants")).toBe(true);
     expect(canManualRerunSource("nj_grants")).toBe(true);
+    expect(isStateCityIngestSource("nyc_cityrecord")).toBe(true);
+    expect(canManualRerunSource("nyc_cityrecord")).toBe(true);
+    expect(isStateCityIngestSource("nys_contract_reporter")).toBe(true);
+    expect(canManualRerunSource("nys_contract_reporter")).toBe(true);
   });
 
   it("does not expose manual runners for planned, blocked, or manual-only sources", () => {

@@ -14,6 +14,8 @@ export const RFP_SAVED_SEARCH_SOURCES = [
   "nyc_hra",
   "nyc_doe",
   "nyc_passport",
+  "nyc_cityrecord",
+  "nys_contract_reporter",
   "ca_grants",
   "nj_grants",
   "ct_grants",

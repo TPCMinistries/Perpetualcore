@@ -112,12 +112,14 @@ function sourceTierChip(source: string): string {
     case 'fed_register':
       return 'Federal';
     case 'ny_state':
+    case 'nys_contract_reporter':
       return 'NY State';
     case 'ca_grants':
       return 'CA State';
     case 'nyc_dycd':
     case 'nyc_hra':
     case 'nyc_doe':
+    case 'nyc_cityrecord':
       return 'NYC';
     case 'foundation_url':
       return 'Foundation';

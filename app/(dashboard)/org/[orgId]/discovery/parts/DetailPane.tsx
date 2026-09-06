@@ -275,6 +275,8 @@ function sourceLabel(source: string): string {
     nyc_hra: "NYC HRA",
     nyc_doe: "NYC DOE",
     nyc_passport: "NYC PASSPort",
+    nyc_cityrecord: "NYC City Record",
+    nys_contract_reporter: "NYS Contract Reporter",
     ca_grants: "CA Grants",
     nj_grants: "NJ Grants",
     ct_grants: "CT Grants",
