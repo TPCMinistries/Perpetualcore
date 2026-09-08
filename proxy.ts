@@ -404,9 +404,10 @@ export const config = {
      * Feel free to modify this pattern to include more paths.
      */
     /*
-     * meridian and meridian-static are rewritten to a separate Next.js zone
-     * (see next.config.mjs). Auth middleware must not touch them.
+     * meridian, meridian-static and phd are rewritten to separate Next.js
+     * zones (see next.config.mjs). Auth middleware must not touch them —
+     * the zones own their own auth.
      */
-    '/((?!_next/static|_next/image|favicon.ico|meridian|meridian-static|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|meridian|meridian-static|phd|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

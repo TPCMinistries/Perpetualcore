@@ -61,14 +61,35 @@ const nextConfig = {
   // to the Meridian production URL — when it is unset these rewrites are
   // omitted entirely so a missing env var can never break the site.
   async rewrites() {
-    const zone = process.env.MERIDIAN_ZONE_URL;
-    if (!zone) return [];
-    const origin = zone.startsWith('http') ? zone : `https://${zone}`;
-    return [
-      { source: '/meridian', destination: `${origin}/meridian` },
-      { source: '/meridian/:path*', destination: `${origin}/meridian/:path*` },
-      { source: '/meridian-static/:path*', destination: `${origin}/meridian-static/:path*` },
-    ];
+    const toOrigin = (zone) =>
+      zone.startsWith('http') ? zone : `https://${zone}`;
+    const rules = [];
+
+    const meridian = process.env.MERIDIAN_ZONE_URL;
+    if (meridian) {
+      const origin = toOrigin(meridian);
+      rules.push(
+        { source: '/meridian', destination: `${origin}/meridian` },
+        { source: '/meridian/:path*', destination: `${origin}/meridian/:path*` },
+        { source: '/meridian-static/:path*', destination: `${origin}/meridian-static/:path*` },
+      );
+    }
+
+    // /phd is served by the standalone Daughtry Living Archive app, which
+    // builds with basePath '/phd' — so its pages AND its assets already live
+    // under that prefix and these two rules cover everything, with no separate
+    // -static prefix needed. Set DAUGHTRY_ZONE_URL in Vercel; when it is unset
+    // these rewrites are omitted so a missing env var can never break the site.
+    const daughtry = process.env.DAUGHTRY_ZONE_URL;
+    if (daughtry) {
+      const origin = toOrigin(daughtry);
+      rules.push(
+        { source: '/phd', destination: `${origin}/phd` },
+        { source: '/phd/:path*', destination: `${origin}/phd/:path*` },
+      );
+    }
+
+    return rules;
   },
 
   // 301 redirects for retired routes per BRAND_ARCHITECTURE §7
@@ -186,25 +207,12 @@ const nextConfig = {
         permanent: false,
       },
       {
-        // Branded preview link for The Daughtry Living Archive (the
-        // digital museum of Rev. Herbert Daughtry, a separate Vercel
-        // app). A redirect rather than a rewrite on purpose: the
-        // archive sends X-Frame-Options: DENY and frame-ancestors
-        // 'none', so the iframe pattern used for /gullahgeecheechamber
-        // cannot render it, and a multi-zone rewrite (see the Meridian
-        // block above) would require giving the archive a /phd
-        // basePath, which would break the URL already shared with the
-        // family. Temporary: destination moves to the archive's own
-        // domain once that is chosen — do not mark permanent or
-        // browsers will cache the vercel.app URL.
-        source: "/phd",
-        destination: "https://daughtry-living-archive.vercel.app",
-        permanent: false,
-      },
-      {
-        // Uppercase variant (redirects are case-sensitive).
+        // The Daughtry Living Archive is served in-place at /phd by the
+        // multi-zone rewrite above, so the Perpetual Core URL stays in the
+        // address bar. Only the uppercase spelling needs a hop, since Next
+        // matches paths case-sensitively.
         source: "/PHD",
-        destination: "https://daughtry-living-archive.vercel.app",
+        destination: "/phd",
         permanent: false,
       },
       {
