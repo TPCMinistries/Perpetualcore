@@ -186,6 +186,28 @@ const nextConfig = {
         permanent: false,
       },
       {
+        // Branded preview link for The Daughtry Living Archive (the
+        // digital museum of Rev. Herbert Daughtry, a separate Vercel
+        // app). A redirect rather than a rewrite on purpose: the
+        // archive sends X-Frame-Options: DENY and frame-ancestors
+        // 'none', so the iframe pattern used for /gullahgeecheechamber
+        // cannot render it, and a multi-zone rewrite (see the Meridian
+        // block above) would require giving the archive a /phd
+        // basePath, which would break the URL already shared with the
+        // family. Temporary: destination moves to the archive's own
+        // domain once that is chosen — do not mark permanent or
+        // browsers will cache the vercel.app URL.
+        source: "/phd",
+        destination: "https://daughtry-living-archive.vercel.app",
+        permanent: false,
+      },
+      {
+        // Uppercase variant (redirects are case-sensitive).
+        source: "/PHD",
+        destination: "https://daughtry-living-archive.vercel.app",
+        permanent: false,
+      },
+      {
         // Lowercase variant for the BlackIvy Meeting Gym (app/BI serves
         // the canonical uppercase path; redirects are case-sensitive).
         source: "/bi",
