@@ -207,15 +207,6 @@ const nextConfig = {
         permanent: false,
       },
       {
-        // The Daughtry Living Archive is served in-place at /phd by the
-        // multi-zone rewrite above, so the Perpetual Core URL stays in the
-        // address bar. Only the uppercase spelling needs a hop, since Next
-        // matches paths case-sensitively.
-        source: "/PHD",
-        destination: "/phd",
-        permanent: false,
-      },
-      {
         // Lowercase variant for the BlackIvy Meeting Gym (app/BI serves
         // the canonical uppercase path; redirects are case-sensitive).
         source: "/bi",
