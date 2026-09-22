@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import { inspectExport } from './preflight.ts';
+const clean={nodes:[{id:'1',name:'Start',type:'n8n-nodes-base.manualTrigger'},{id:'2',name:'Map',type:'n8n-nodes-base.set',parameters:{value:'={{ $("Start").item.json.id }}'}}],connections:{Start:{main:[[{node:'Map',type:'main',index:0}]]}}};
+const good=inspectExport(clean);
+assert.equal(good.findings.length,0);
+assert.equal(good.executableVerified,false);
+assert.equal(good.requiredLiveChecks.length,6);
+assert(inspectExport({nodes:[]}).findings.some(f=>f.code==='EXPORT_SHAPE'));
+assert(inspectExport([clean,clean]).findings.some(f=>f.code==='EXPORT_SHAPE'));
+const bad=structuredClone(clean);
+bad.connections.Start.main[0][0].node='Absent';
+assert(inspectExport(bad).findings.some(f=>f.code==='MISSING_DESTINATION'));
+assert(inspectExport({...clean,nodes:[...clean.nodes,clean.nodes[0]]}).findings.some(f=>f.code==='DUPLICATE_NAME'));
+const sensitive={...clean,nodes:[{id:'9',name:'Call',type:'n8n-nodes-base.httpRequest',retryOnFail:true,continueOnFail:true,credentials:{httpHeaderAuth:{id:'credential-reference'}},parameters:{apiKey:'SYNTHETIC_SECRET_DO_NOT_ECHO',data:'={{ $node["Gone"].json }}'}}]};
+const inspected=inspectExport(sensitive);
+for(const code of ['RETRY_SIDE_EFFECT','CONTINUE_AFTER_ERROR','CREDENTIAL_RECONNECT','POSSIBLE_SECRET','UNRESOLVED_REFERENCE']) assert(inspected.findings.some(f=>f.code===code));
+assert(!JSON.stringify(inspected).includes('SYNTHETIC_SECRET_DO_NOT_ECHO'));
+console.log('Static preflight verified: valid graph, invalid shape, multiple exports, missing destination, duplicate names, error continuation, retries, credential references, expression references, secret-value omission. No providers called.');
