@@ -136,6 +136,12 @@ export function Footer({ tone = "light" }: { tone?: "light" | "dark" }) {
               Privacy
             </Link>
             <Link
+              href="/refund-policy"
+              className={cn("inline-flex min-h-6 items-center", dark ? "hover:text-white" : "hover:text-[#25252b]")}
+            >
+              Refunds
+            </Link>
+            <Link
               href="/cookies"
               className={cn("inline-flex min-h-6 items-center", dark ? "hover:text-white" : "hover:text-[#25252b]")}
             >

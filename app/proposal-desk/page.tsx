@@ -14,7 +14,7 @@ import { Footer } from "@/components/landing/Footer";
 import { FundingScanForm } from "./FundingScanForm";
 
 export const metadata: Metadata = {
-  title: "Proposal Desk — Fixed-price grant and RFP proposals | Perpetual Core",
+  title: "Proposal Desk — Fixed-price grant and RFP proposals",
   description:
     "Finished, compliance-checked grant and RFP proposal packages for community nonprofits, delivered in five business days for a flat fee. Start with a free Funding Scan.",
   alternates: { canonical: "/proposal-desk" },
@@ -166,7 +166,11 @@ export default function ProposalDeskPage() {
           </div>
           <p className="mt-6 text-sm text-muted-foreground max-w-3xl leading-[1.65]">
             We take two packages a week so every one gets real attention. No percentage of
-            awards, ever.
+            awards, ever. Your deposit is fully refundable until work begins; see our{" "}
+            <a href="/refund-policy" className="underline underline-offset-4 hover:text-foreground">
+              refund and cancellation policy
+            </a>
+            .
           </p>
         </div>
       </section>
