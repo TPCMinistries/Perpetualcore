@@ -133,7 +133,7 @@ export function NewsletterCapture({
         </label>
         {state === "error" && (
           <p className="sm:col-span-3 text-xs text-red-500">
-            Submit failed. Try again, or email lorenzo@perpetualcore.com.
+            Submit failed. Try again, or email info@perpetualcore.com.
           </p>
         )}
       </form>

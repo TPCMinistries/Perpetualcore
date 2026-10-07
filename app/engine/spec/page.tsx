@@ -128,7 +128,7 @@ export default function EngineSpecPage() {
 
           <div className="flex flex-col sm:flex-row items-start gap-4">
             <Button asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-              <a href="mailto:lorenzo@perpetualcore.com?subject=Adopting%20the%20Engine%20spec">
+              <a href="mailto:info@perpetualcore.com?subject=Adopting%20the%20Engine%20spec">
                 Declare adoption <ArrowRight className="ml-2 h-4 w-4" />
               </a>
             </Button>
@@ -342,8 +342,8 @@ disclosure  = annual_audit + per_invoice_line_item`}
               <p className="text-base text-muted-foreground leading-[1.7]">
                 Ventures that have publicly declared conformance to v1.0. New implementations
                 may be added via email to{" "}
-                <a href="mailto:lorenzo@perpetualcore.com" className="text-primary hover:underline underline-offset-4">
-                  lorenzo@perpetualcore.com
+                <a href="mailto:info@perpetualcore.com" className="text-primary hover:underline underline-offset-4">
+                  info@perpetualcore.com
                 </a>
                 . Future versions of this spec will move registration to a public process.
               </p>
@@ -443,7 +443,7 @@ disclosure  = annual_audit + per_invoice_line_item`}
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <Button size="lg" asChild className="text-sm font-medium px-7 h-11 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]">
-                <a href="mailto:lorenzo@perpetualcore.com?subject=Adopting%20the%20Engine%20spec">
+                <a href="mailto:info@perpetualcore.com?subject=Adopting%20the%20Engine%20spec">
                   Declare adoption <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>
