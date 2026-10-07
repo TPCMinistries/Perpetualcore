@@ -14,7 +14,7 @@ import { Footer } from "@/components/landing/Footer";
 import { FundingScanForm } from "./FundingScanForm";
 
 export const metadata: Metadata = {
-  title: "Proposal Desk — Fixed-price grant and RFP proposals | Perpetual Core",
+  title: "Proposal Desk — Fixed-price grant and RFP proposals",
   description:
     "Finished, compliance-checked grant and RFP proposal packages for community nonprofits, delivered in five business days for a flat fee. Start with a free Funding Scan.",
   alternates: { canonical: "/proposal-desk" },

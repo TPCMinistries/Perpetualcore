@@ -10,7 +10,7 @@ import { Navbar } from "@/components/landing/Navbar";
 import { Footer } from "@/components/landing/Footer";
 
 export const metadata: Metadata = {
-  title: "Refund and Cancellation Policy | Perpetual Core",
+  title: "Refund and Cancellation Policy",
   description:
     "How cancellations and refunds work for Perpetual Core subscriptions, fixed-scope services such as Proposal Desk, and monthly engagements.",
   alternates: { canonical: "/refund-policy" },
