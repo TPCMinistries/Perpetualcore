@@ -28,7 +28,7 @@ const LANES = [
     buyer: "Funds, attorneys, investigators, operators",
     body: "We run recurring subject, company, and deal diligence with Sentinel as the product layer and studio judgment around the edges.",
     outcome: "A repeatable diligence desk your team can trust before hires, deals, partnerships, or public exposure.",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Diligence%20Lane",
+    href: "mailto:info@perpetualcore.com?subject=Diligence%20Lane",
   },
   {
     index: "02",
@@ -38,7 +38,7 @@ const LANES = [
     buyer: "Grant-funded orgs, capture teams, EDs",
     body: "We surface opportunities, score fit, prepare first drafts, and keep the capture motion from dying between deadlines.",
     outcome: "A live opportunity pipeline with fewer missed bids and cleaner go/no-go judgment.",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Capture%20Lane",
+    href: "mailto:info@perpetualcore.com?subject=Capture%20Lane",
   },
   {
     index: "03",
@@ -48,7 +48,7 @@ const LANES = [
     buyer: "Foundations, health systems, multi-program orgs",
     body: "We turn calls, docs, meeting notes, voice memos, and program history into institutional memory your team can actually query.",
     outcome: "Less repeated context, faster onboarding, and a cleaner path from scattered knowledge to operating system.",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Knowledge%20Lane",
+    href: "mailto:info@perpetualcore.com?subject=Knowledge%20Lane",
   },
   {
     index: "04",
@@ -58,7 +58,7 @@ const LANES = [
     buyer: "Workforce orgs, agencies, intern-heavy teams",
     body: "We manage the candidate, intern, staff, or partner lifecycle with intake, documents, onboarding, and follow-through in one lane.",
     outcome: "A cleaner people operation where forms, follow-ups, files, and decisions stop living in separate places.",
-    href: "mailto:lorenzo@perpetualcore.com?subject=People%20Lane",
+    href: "mailto:info@perpetualcore.com?subject=People%20Lane",
   },
   {
     index: "05",
@@ -68,7 +68,7 @@ const LANES = [
     buyer: "Founders, COOs, operating partners",
     body: "We sit beside the operator: tuning workflows, cleaning handoffs, building skills, and reviewing where AI should become process.",
     outcome: "A monthly operating rhythm that turns scattered AI use into a managed execution layer.",
-    href: "mailto:lorenzo@perpetualcore.com?subject=Operator%20Lane",
+    href: "mailto:info@perpetualcore.com?subject=Operator%20Lane",
   },
 ];
 

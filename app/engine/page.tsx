@@ -463,7 +463,7 @@ export default function EnginePage() {
                 asChild
                 className="text-sm font-medium h-11 px-7 shadow-none bg-foreground text-background hover:bg-foreground/90 rounded-[6px]"
               >
-                <a href="mailto:lorenzo@perpetualcore.com?subject=Adopting%20the%20Engine">
+                <a href="mailto:info@perpetualcore.com?subject=Adopting%20the%20Engine">
                   Email the founder <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
               </Button>

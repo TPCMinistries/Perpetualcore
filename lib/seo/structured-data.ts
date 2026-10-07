@@ -42,7 +42,7 @@ export function organizationSchema() {
       {
         "@type": "ContactPoint",
         contactType: "sales",
-        email: "lorenzo@perpetualcore.com",
+        email: "info@perpetualcore.com",
         availableLanguage: ["English"],
       },
       {

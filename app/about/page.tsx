@@ -202,7 +202,7 @@ export default function AboutPage() {
 
               <div className="pt-6">
                 <Link
-                  href="mailto:lorenzo@perpetualcore.com"
+                  href="mailto:info@perpetualcore.com"
                   className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors"
                 >
                   Talk to Lorenzo <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
@@ -334,7 +334,7 @@ export default function AboutPage() {
                   </Link>
                 </Button>
                 <a
-                  href="mailto:lorenzo@perpetualcore.com"
+                  href="mailto:info@perpetualcore.com"
                   className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3"
                 >
                   Email the founder <ArrowRight className="ml-1.5 h-3.5 w-3.5" />

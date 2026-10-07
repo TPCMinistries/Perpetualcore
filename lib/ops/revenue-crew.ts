@@ -51,7 +51,7 @@ export interface FromAddress {
  */
 export const FROM_ADDRESSES = {
   pc: { from: 'sales@perpetualcore.com', verified: false },
-  coaching: { from: 'lorenzo@perpetualcore.com', verified: false },
+  coaching: { from: 'info@perpetualcore.com', verified: false },
   tpc: { from: 'lorenzo@tpcmin.com', verified: true },
 } satisfies Record<string, FromAddress>;
 

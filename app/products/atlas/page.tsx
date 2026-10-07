@@ -234,8 +234,8 @@ export default function AtlasPage() {
                   </p>
                   <p className="text-base text-foreground leading-[1.65]">
                     We&apos;ll reach out within two business days. If it&apos;s urgent, email{" "}
-                    <a href="mailto:lorenzo@perpetualcore.com" className="text-primary underline underline-offset-4">
-                      lorenzo@perpetualcore.com
+                    <a href="mailto:info@perpetualcore.com" className="text-primary underline underline-offset-4">
+                      info@perpetualcore.com
                     </a>{" "}
                     directly.
                   </p>
@@ -286,7 +286,7 @@ export default function AtlasPage() {
                       {state === "submitting" ? "Sending…" : "Request introduction"}
                       {state !== "submitting" && <ArrowRight className="ml-2 h-4 w-4" />}
                     </Button>
-                    <a href="mailto:lorenzo@perpetualcore.com?subject=Atlas%20intro" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3">
+                    <a href="mailto:info@perpetualcore.com?subject=Atlas%20intro" className="inline-flex items-center text-sm font-medium text-foreground hover:text-primary transition-colors py-3">
                       Email Lorenzo directly <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                     </a>
                   </div>

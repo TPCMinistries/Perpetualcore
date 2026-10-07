@@ -237,7 +237,7 @@ export function ExitIntent() {
               </button>
               {state === "error" && (
                 <p className="text-xs text-red-500">
-                  Submit failed. Try again, or email lorenzo@perpetualcore.com.
+                  Submit failed. Try again, or email info@perpetualcore.com.
                 </p>
               )}
               <p className="text-xs text-muted-foreground text-center pt-2">

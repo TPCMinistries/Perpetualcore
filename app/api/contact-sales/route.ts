@@ -191,7 +191,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           error:
-            "We could not safely store this inquiry. Please try again or email lorenzo@perpetualcore.com.",
+            "We could not safely store this inquiry. Please try again or email info@perpetualcore.com.",
           persisted: false,
         },
         { status: 503 }

@@ -363,7 +363,7 @@ function PackageIntakeForm() {
 
               {submitState === "error" ? (
                 <p className="text-sm text-red-600">
-                  Submit failed. Email lorenzo@perpetualcore.com with the same context.
+                  Submit failed. Email info@perpetualcore.com with the same context.
                 </p>
               ) : null}
             </form>
