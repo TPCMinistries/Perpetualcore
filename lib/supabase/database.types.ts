@@ -18996,6 +18996,137 @@ export type Database = {
           },
         ]
       }
+      press_stories: {
+        Row: {
+          created_at: string
+          created_by: string
+          error_message: string | null
+          id: string
+          interview: Json
+          interview_complete: boolean
+          notes: string
+          organization_id: string
+          outputs: Json | null
+          status: string
+          title: string
+          updated_at: string
+          voice_key: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          error_message?: string | null
+          id?: string
+          interview?: Json
+          interview_complete?: boolean
+          notes?: string
+          organization_id: string
+          outputs?: Json | null
+          status?: string
+          title: string
+          updated_at?: string
+          voice_key: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          error_message?: string | null
+          id?: string
+          interview?: Json
+          interview_complete?: boolean
+          notes?: string
+          organization_id?: string
+          outputs?: Json | null
+          status?: string
+          title?: string
+          updated_at?: string
+          voice_key?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_stories_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      press_story_assets: {
+        Row: {
+          caption_hint: string | null
+          created_at: string
+          duration_ms: number | null
+          file_size: number
+          height: number | null
+          id: string
+          kind: string
+          mime_type: string
+          organization_id: string
+          original_filename: string | null
+          poster_path: string | null
+          sort_order: number
+          status: string
+          storage_path: string
+          story_id: string
+          updated_at: string
+          width: number | null
+        }
+        Insert: {
+          caption_hint?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          file_size: number
+          height?: number | null
+          id?: string
+          kind: string
+          mime_type: string
+          organization_id: string
+          original_filename?: string | null
+          poster_path?: string | null
+          sort_order?: number
+          status?: string
+          storage_path: string
+          story_id: string
+          updated_at?: string
+          width?: number | null
+        }
+        Update: {
+          caption_hint?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          file_size?: number
+          height?: number | null
+          id?: string
+          kind?: string
+          mime_type?: string
+          organization_id?: string
+          original_filename?: string | null
+          poster_path?: string | null
+          sort_order?: number
+          status?: string
+          storage_path?: string
+          story_id?: string
+          updated_at?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "press_story_assets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "press_story_assets_story_id_organization_id_fkey"
+            columns: ["story_id", "organization_id"]
+            isOneToOne: false
+            referencedRelation: "press_stories"
+            referencedColumns: ["id", "organization_id"]
+          },
+        ]
+      }
       press_transcript_segments: {
         Row: {
           confidence: number | null
