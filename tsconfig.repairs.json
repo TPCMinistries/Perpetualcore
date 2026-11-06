@@ -1,0 +1,6 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": { "incremental": false },
+  "include": ["next-env.d.ts", "app/repairs/**/*.tsx", "lib/repairs/**/*.ts", "tests/repairs/**/*.ts", "tests/repairs/**/*.tsx"],
+  "exclude": ["node_modules"]
+}
